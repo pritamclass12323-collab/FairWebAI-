@@ -1,0 +1,1881 @@
+<!doctype html>
+<html lang="en" data-theme="default" data-size="normal" data-motion="auto">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FairWeb AI – Find and fix accessibility problems in your website</title>
+  <meta name="description" content="Paste your page's HTML and FairWeb AI checks contrast, image descriptions, form labels and keyboard access, explains each problem in plain language, and gives you a report with fixes.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&amp;display=swap" rel="stylesheet">
+  <style>
+/* FairWeb AI – styles
+   Signature motif: the double focus ring (ink outline + yellow halo). */
+
+:root {
+  --ink: #0b1f33;
+  --ink-soft: #3a4a5c;
+  --on-ink: #ffffff;
+  --paper: #f4f7fb;
+  --white: #ffffff;
+  --line: #c3cedc;
+  --accent: #2b2fd9;
+  --accent-ink: #ffffff;
+  --link: #2b2fd9;
+  --ring: #ffcf33;
+  --pass: #0b6b4c;
+  --pass-bg: #e1f4ec;
+  --code-bg: #0b1f33;
+  --code-ink: #f4f7fb;
+
+  --crit-bar: #b42318; --crit-bg: #fde6e6; --crit-ink: #8a1111;
+  --serious-bar: #c2570c; --serious-bg: #ffebd6; --serious-ink: #7a3a00;
+  --moderate-bar: #a16207; --moderate-bg: #fff4c2; --moderate-ink: #574400;
+  --minor-bar: #2563eb; --minor-bg: #e3ecfb; --minor-ink: #1e3a6b;
+
+  --font: "Atkinson Hyperlegible", "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+/* High-contrast theme */
+html[data-theme="hc"] {
+  --ink: #ffffff;
+  --ink-soft: #ffffff;
+  --on-ink: #000000;
+  --paper: #000000;
+  --white: #000000;
+  --line: #ffffff;
+  --accent: #ffe14d;
+  --accent-ink: #000000;
+  --link: #ffffff;
+  --ring: #ffe14d;
+  --pass: #7dffb8;
+  --pass-bg: #000000;
+  --code-bg: #000000;
+  --code-ink: #ffffff;
+  --crit-bar: #ffffff; --crit-bg: #000000; --crit-ink: #ffffff;
+  --serious-bar: #ffffff; --serious-bg: #000000; --serious-ink: #ffffff;
+  --moderate-bar: #ffffff; --moderate-bg: #000000; --moderate-ink: #ffffff;
+  --minor-bar: #ffffff; --minor-bg: #000000; --minor-ink: #ffffff;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { font-size: 100%; scroll-behavior: smooth; }
+html[data-size="large"] { font-size: 125%; }
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+h1, h2, h3, h4 { line-height: 1.15; margin: 0 0 .75rem; font-weight: 700; letter-spacing: -.01em; }
+h2 { font-size: clamp(1.7rem, 3.4vw, 2.4rem); }
+h3 { font-size: 1.25rem; }
+p { margin: 0 0 1rem; max-width: 70ch; }
+a { color: var(--link); text-underline-offset: .2em; }
+a:hover { text-decoration-thickness: 3px; }
+ul, ol { padding-left: 1.25rem; }
+
+.wrap { width: min(100% - 2rem, 70rem); margin-inline: auto; }
+.narrow { width: min(100% - 2rem, 52rem); }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Focus: the double ring */
+:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 7px var(--ring);
+  border-radius: 4px;
+}
+
+.skip {
+  position: absolute; left: .5rem; top: -4rem; z-index: 50;
+  background: var(--ink); color: var(--on-ink); padding: .75rem 1rem; font-weight: 700;
+}
+.skip:focus { top: .5rem; }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+  min-height: 2.75rem; padding: .55rem 1.1rem;
+  font: inherit; font-weight: 700; line-height: 1.2; text-decoration: none; cursor: pointer;
+  color: var(--ink); background: var(--white);
+  border: 2px solid var(--ink); border-radius: 4px;
+}
+.btn:hover { background: var(--ink); color: var(--on-ink); }
+.btn-primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+html[data-theme="hc"] .btn-primary { border-color: var(--ink); }
+.btn-primary:hover { background: var(--ink); border-color: var(--ink); color: var(--on-ink); }
+.btn-quiet { border-color: var(--line); font-weight: 400; }
+.btn[aria-pressed="true"] { background: var(--ink); color: var(--on-ink); }
+.btn[aria-pressed="true"]::before { content: "✓"; }
+.btn[disabled] { opacity: .6; cursor: progress; }
+
+/* Header */
+.site-header { background: var(--white); border-bottom: 2px solid var(--ink); }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.5rem; padding-block: .75rem; }
+.brand { display: inline-flex; align-items: center; gap: .85rem; font-weight: 700; font-size: 1.25rem; color: var(--ink); text-decoration: none; margin-right: auto; }
+.mark { width: 1.35rem; height: 1.35rem; border: 3px solid var(--ink); border-radius: 4px; background: var(--white); box-shadow: 0 0 0 3px var(--ring); }
+.nav-list { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; list-style: none; margin: 0; padding: 0; }
+.nav-list a { color: var(--ink); font-weight: 700; display: inline-block; padding: .5rem 0; }
+.prefs { position: relative; }
+.prefs summary {
+  list-style: none; cursor: pointer; min-height: 2.75rem; display: inline-flex; align-items: center;
+  padding: .5rem 1rem; border: 2px solid var(--ink); border-radius: 4px; font-weight: 700;
+}
+.prefs summary::-webkit-details-marker { display: none; }
+.prefs summary::after { content: "▾"; margin-left: .5rem; }
+.prefs[open] summary::after { content: "▴"; }
+.panel {
+  position: absolute; right: 0; top: calc(100% + .6rem); z-index: 20; min-width: 14rem;
+  display: grid; gap: .5rem; padding: .75rem; background: var(--white); border: 2px solid var(--ink);
+}
+
+/* Hero */
+.hero { padding-block: clamp(2.5rem, 7vw, 5rem); }
+.hero-grid { display: grid; gap: 3rem; align-items: center; }
+@media (min-width: 62rem) { .hero-grid { grid-template-columns: 1.15fr .85fr; } }
+h1 { font-size: clamp(2.3rem, 5.6vw, 4rem); line-height: 1.04; letter-spacing: -.025em; margin-bottom: 1.25rem; max-width: 15ch; }
+.lede { font-size: 1.2rem; max-width: 60ch; }
+.cta-row, .toolbar { display: flex; flex-wrap: wrap; gap: .75rem; margin-block: 1.5rem 1rem; align-items: center; }
+.fineprint { color: var(--ink-soft); font-size: .95rem; }
+
+.mock-wrap { margin: 0; }
+.mock-wrap figcaption { margin-top: 1.25rem; color: var(--ink-soft); font-size: .95rem; }
+.mock {
+  background: #ffffff; color: #0b1f33; border: 2px solid var(--ink); border-radius: 8px;
+  box-shadow: 12px 12px 0 var(--ring); overflow: hidden;
+}
+.mock-bar { background: #0b1f33; color: #ffffff; padding: .5rem 1rem; font-family: var(--mono); font-size: .8rem; }
+.mock-body { padding: 1.25rem; display: grid; gap: 1.1rem; }
+.mock-row { display: grid; grid-template-columns: 1fr auto; gap: .9rem; align-items: center; }
+.mock-img { height: 4.2rem; background: repeating-linear-gradient(45deg, #dbe4f0, #dbe4f0 10px, #c3cedc 10px, #c3cedc 20px); border-radius: 4px; }
+.mock-faint { margin: 0; color: #a8a8a8; font-size: 1rem; }
+.mock-input { border: 2px solid #5b6b7d; padding: .55rem .75rem; border-radius: 4px; color: #5b6b7d; font-size: .95rem; }
+.mock-btn { background: #2b2fd9; color: #fff; padding: .6rem 1rem; border-radius: 4px; font-weight: 700; text-align: center; }
+.flag { outline: 3px solid #0b1f33; outline-offset: 4px; box-shadow: 0 0 0 7px #ffcf33; border-radius: 4px; margin: 6px 7px; }
+.tag { background: var(--ink); color: var(--on-ink); font-size: .8rem; font-weight: 700; padding: .2rem .55rem; border-radius: 3px; white-space: nowrap; }
+
+@media (prefers-reduced-motion: no-preference) {
+  html:not([data-motion="reduce"]) .flag { animation: ring-in .7s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i) * .3s + .3s); }
+  @keyframes ring-in {
+    from { outline-offset: 22px; box-shadow: 0 0 0 0 #ffcf33; outline-color: transparent; }
+    to   { outline-offset: 4px;  box-shadow: 0 0 0 7px #ffcf33; outline-color: #0b1f33; }
+  }
+}
+html[data-motion="reduce"] { scroll-behavior: auto; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* Facts */
+.facts-band { background: var(--ink); color: var(--on-ink); }
+.facts { list-style: none; display: grid; gap: 1.25rem; margin-block: 0; padding: 1.75rem 0; }
+@media (min-width: 52rem) { .facts { grid-template-columns: repeat(3, 1fr); gap: 0; } .facts li { padding: 0 1.5rem; border-left: 2px solid var(--on-ink); } .facts li:first-child { padding-left: 0; border-left: 0; } }
+.facts li { max-width: 28rem; }
+.facts strong { font-size: 1.35rem; display: block; }
+html[data-theme="hc"] .facts-band { border-block: 2px solid #fff; }
+
+/* Sections */
+.section { padding-block: clamp(3rem, 7vw, 5rem); }
+.band { background: var(--white); border-block: 2px solid var(--ink); }
+
+/* Analyzer */
+.field-label { display: block; font-weight: 700; margin-bottom: .4rem; }
+textarea {
+  width: 100%; min-height: 12rem; font-family: var(--mono); font-size: .9rem; line-height: 1.5;
+  padding: .85rem; color: var(--ink); background: var(--white); border: 2px solid var(--ink); border-radius: 4px; resize: vertical;
+}
+.help { color: var(--ink-soft); font-size: .95rem; margin-top: .5rem; }
+.error { color: var(--crit-ink); background: var(--crit-bg); border-left: 6px solid var(--crit-bar); padding: .6rem .9rem; font-weight: 700; }
+html[data-theme="hc"] .error { border: 2px solid #fff; }
+.file-btn:focus-within { outline: 3px solid var(--ink); outline-offset: 2px; box-shadow: 0 0 0 7px var(--ring); }
+
+#results-wrap { margin-top: 3rem; }
+#results { scroll-margin-top: 1rem; }
+#results.sub { margin-top: 2.5rem; font-size: 1.3rem; }
+
+.summary { display: grid; gap: 1.5rem; align-items: center; padding: 1.5rem; background: var(--white); border: 2px solid var(--ink); }
+@media (min-width: 40rem) { .summary { grid-template-columns: auto 1fr; gap: 2.5rem; } }
+.score { position: relative; width: 9.5rem; height: 9.5rem; }
+.score-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.score-track, .score-bar { fill: none; stroke-width: 12; }
+.score-track { stroke: var(--line); }
+.score-bar { stroke: var(--accent); stroke-linecap: round; stroke-dasharray: 326.73; stroke-dashoffset: 326.73; transition: stroke-dashoffset .9s ease; }
+html[data-theme="hc"] .score-bar { stroke: #ffe14d; }
+html[data-motion="reduce"] .score-bar { transition: none; }
+.score-num { position: absolute; inset: 0; display: grid; place-items: center; font-size: 2.6rem; font-weight: 700; }
+.grade { font-size: 1.6rem; font-weight: 700; margin-bottom: .25rem; }
+.sev-counts { display: flex; flex-wrap: wrap; gap: .5rem; list-style: none; padding: 0; margin: 1rem 0 0; }
+
+.badge { display: inline-flex; align-items: center; gap: .35rem; padding: .15rem .6rem; border-radius: 3px; font-size: .9rem; font-weight: 700; border: 2px solid transparent; white-space: nowrap; }
+.badge-critical { background: var(--crit-bg); color: var(--crit-ink); border-color: var(--crit-bar); }
+.badge-serious { background: var(--serious-bg); color: var(--serious-ink); border-color: var(--serious-bar); }
+.badge-moderate { background: var(--moderate-bg); color: var(--moderate-ink); border-color: var(--moderate-bar); }
+.badge-minor { background: var(--minor-bg); color: var(--minor-ink); border-color: var(--minor-bar); }
+.badge-critical::before { content: "■"; } .badge-serious::before { content: "▲"; } .badge-moderate::before { content: "●"; } .badge-minor::before { content: "◆"; }
+
+.cats { list-style: none; padding: 0; display: grid; gap: .9rem; margin-block: 1rem; }
+@media (min-width: 40rem) { .cats { grid-template-columns: repeat(2, 1fr); gap: .9rem 2rem; } }
+.cat-top { display: flex; justify-content: space-between; gap: 1rem; font-weight: 700; }
+.cat-bar { height: .7rem; border: 2px solid var(--ink); background: var(--white); margin-top: .3rem; }
+.cat-fill { display: block; height: 100%; background: var(--pass); }
+html[data-theme="hc"] .cat-fill { background: #7dffb8; }
+.cat-bad .cat-fill { background: var(--serious-bar); }
+
+.notes p { background: var(--minor-bg); color: var(--minor-ink); border-left: 6px solid var(--minor-bar); padding: .7rem 1rem; margin-bottom: .75rem; }
+html[data-theme="hc"] .notes p { border: 2px solid #fff; }
+
+.issues-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1rem; }
+.issues-head .sub { margin-bottom: 0; }
+.filter { display: flex; flex-wrap: wrap; gap: .5rem; }
+.filter .btn { min-height: 2.5rem; padding-block: .3rem; font-size: .95rem; }
+.expand-row { display: flex; gap: .5rem; margin: 1rem 0; }
+.expand-row .btn { min-height: 2.5rem; padding-block: .3rem; }
+.issues { list-style: none; padding: 0; margin: 0; display: grid; gap: .9rem; }
+
+details.issue { background: var(--white); border: 2px solid var(--ink); border-left-width: 10px; }
+details.issue.sev-critical { border-left-color: var(--crit-bar); }
+details.issue.sev-serious { border-left-color: var(--serious-bar); }
+details.issue.sev-moderate { border-left-color: var(--moderate-bar); }
+details.issue.sev-minor { border-left-color: var(--minor-bar); }
+details.issue > summary { list-style: none; cursor: pointer; display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .9rem; padding: 1rem 1.1rem; }
+details.issue > summary::-webkit-details-marker { display: none; }
+details.issue > summary::before { content: "▸"; font-size: 1.1rem; }
+details.issue[open] > summary::before { content: "▾"; }
+.issue-title { margin: 0; font-size: 1.1rem; flex: 1 1 18rem; letter-spacing: 0; }
+.issue-meta { color: var(--ink-soft); font-size: .9rem; font-weight: 700; }
+.issue-body { padding: .25rem 1.25rem 1.5rem 2.2rem; display: grid; gap: 1rem; }
+.issue-body h4 { margin: 0 0 .25rem; font-size: 1rem; }
+.issue-body p { margin: 0; }
+.wcag { color: var(--ink-soft); font-size: .9rem; }
+
+.codewrap { display: grid; gap: .4rem; }
+.codebar { display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+.copy-btn { min-height: 2.25rem; padding: .2rem .8rem; font-size: .9rem; }
+pre { margin: 0; padding: 1rem; overflow: auto; background: var(--code-bg); color: var(--code-ink); font-family: var(--mono); font-size: .875rem; line-height: 1.55; border-radius: 4px; }
+html[data-theme="hc"] pre { border: 2px solid #fff; }
+pre code { font-family: inherit; white-space: pre; }
+
+.sr-compare { display: grid; gap: .5rem; }
+@media (min-width: 40rem) { .sr-compare { grid-template-columns: 1fr 1fr; } }
+.sr-compare blockquote { margin: 0; padding: .7rem .9rem; border: 2px solid var(--ink); font-style: italic; }
+.sr-compare .good { background: var(--pass-bg); border-color: var(--pass); }
+.sr-compare strong { display: block; font-style: normal; font-size: .9rem; margin-bottom: .15rem; }
+
+.swatches { display: grid; gap: .5rem; }
+@media (min-width: 40rem) { .swatches { grid-template-columns: 1fr 1fr; } }
+.swatch { padding: .8rem 1rem; border: 2px solid var(--ink); }
+.swatch small { display: block; font-size: .85rem; margin-bottom: .2rem; }
+
+.examples { list-style: none; padding: 0; margin: 0; display: grid; gap: .75rem; }
+.example-selector { font-family: var(--mono); font-size: .85rem; color: var(--ink-soft); margin-bottom: .25rem; word-break: break-all; }
+
+.passed { list-style: none; padding: 0; display: grid; gap: .5rem; }
+.passed li { display: flex; gap: .6rem; align-items: baseline; }
+.passed li::before { content: "✓"; font-weight: 700; color: var(--pass); }
+.empty-state { padding: 1.5rem; background: var(--pass-bg); border: 2px solid var(--pass); font-weight: 700; }
+
+/* Contrast lab */
+.lab { display: grid; gap: 2rem; margin-top: 1.5rem; }
+@media (min-width: 62rem) { .lab { grid-template-columns: 18rem 1fr 1fr; align-items: start; } }
+.lab-controls { display: grid; gap: 1.1rem; }
+.colorfield label { display: block; font-weight: 700; margin-bottom: .3rem; }
+.pair { display: flex; gap: .5rem; }
+.pair input[type="color"] { width: 3.2rem; height: 2.9rem; padding: 2px; border: 2px solid var(--ink); background: var(--white); border-radius: 4px; cursor: pointer; }
+.pair input[type="text"] { flex: 1; min-width: 0; font: inherit; font-family: var(--mono); padding: .5rem .7rem; color: var(--ink); background: var(--white); border: 2px solid var(--ink); border-radius: 4px; }
+.ratio { font-size: 3rem; font-weight: 700; line-height: 1; margin-bottom: 1rem; }
+.levels { list-style: none; padding: 0; margin: 0 0 1rem; display: grid; gap: .4rem; }
+.levels li { display: flex; justify-content: space-between; gap: 1rem; padding: .4rem .7rem; border: 2px solid var(--ink); }
+.levels .pass { background: var(--pass-bg); }
+.levels .pass b { color: var(--pass); }
+.levels .fail b { color: var(--crit-ink); }
+html[data-theme="hc"] .levels .pass b, html[data-theme="hc"] .levels .fail b { color: #fff; }
+.lab-preview { padding: 1.5rem; border: 2px solid var(--ink); }
+.lab-preview p { margin-bottom: .75rem; }
+.preview-large { font-size: 1.5rem; font-weight: 700; }
+.preview-small { font-size: .875rem; }
+
+/* Learn */
+.people { display: grid; gap: 0; margin-top: 1.5rem; border-top: 2px solid var(--ink); }
+@media (min-width: 46rem) { .people { grid-template-columns: repeat(2, 1fr); } .people article:nth-child(odd) { border-right: 2px solid var(--ink); padding-right: 2rem; } .people article:nth-child(even) { padding-left: 2rem; } }
+.people article { padding-block: 1.5rem; border-bottom: 2px solid var(--ink); }
+.people p { margin: 0; }
+.kbtest { margin-top: 3rem; padding: 1.5rem 1.75rem; background: var(--white); border: 2px solid var(--ink); box-shadow: 8px 8px 0 var(--ring); max-width: 44rem; }
+.kbtest ol { margin: 0; display: grid; gap: .5rem; }
+
+/* About */
+.about-grid { display: grid; gap: 3rem; }
+@media (min-width: 52rem) { .about-grid { grid-template-columns: 1fr 1fr; } }
+.plain-list { padding-left: 1.1rem; display: grid; gap: .5rem; margin-bottom: 1.5rem; }
+
+.site-footer { background: var(--ink); color: var(--on-ink); padding-block: 2rem; }
+.site-footer p { margin-bottom: .5rem; }
+
+/* Print: report only */
+@media print {
+  .site-header, .hero, .facts-band, #analyzer .narrow, #contrast, #learn, #about, .site-footer, .actions, .expand-row, .filter, .copy-btn, .skip { display: none !important; }
+  body { background: #fff; color: #000; }
+  details.issue { break-inside: avoid; }
+}
+
+</style>
+</head>
+<body id="top">
+  <a class="skip" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="wrap bar">
+      <a class="brand" href="#top"><span class="mark" aria-hidden="true"></span>FairWeb AI</a>
+
+      <nav aria-label="Primary">
+        <ul class="nav-list">
+          <li><a href="#analyzer">Page checker</a></li>
+          <li><a href="#contrast">Contrast lab</a></li>
+          <li><a href="#learn">Learn</a></li>
+          <li><a href="#about">About</a></li>
+        </ul>
+      </nav>
+
+      <details class="prefs">
+        <summary>Display options</summary>
+        <div class="panel" role="group" aria-label="Display options">
+          <button type="button" class="btn" id="pref-contrast" aria-pressed="false">High contrast</button>
+          <button type="button" class="btn" id="pref-size" aria-pressed="false">Larger text</button>
+          <button type="button" class="btn" id="pref-motion" aria-pressed="false">Reduce motion</button>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <h1 id="hero-title">Find what blocks people. Fix it in minutes.</h1>
+          <p class="lede">Paste your page’s HTML. FairWeb AI checks text contrast, image descriptions, form labels and keyboard access, explains every problem in plain language, and hands you a report with fixes you can copy.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="#analyzer">Check my page</a>
+            <button type="button" class="btn" id="hero-sample">Try a broken sample page</button>
+          </div>
+          <p class="fineprint">Runs entirely in your browser. Your code is never uploaded.</p>
+        </div>
+
+        <figure class="mock-wrap">
+          <div class="mock" aria-hidden="true">
+            <div class="mock-bar">greenbasket.example/signup</div>
+            <div class="mock-body">
+              <div class="mock-row">
+                <div class="mock-img flag" style="--i:0"></div>
+                <span class="tag">No alt text</span>
+              </div>
+              <div class="mock-row">
+                <p class="mock-faint flag" style="--i:1">Order before 9am for same-day delivery</p>
+                <span class="tag">Contrast 2.4 : 1</span>
+              </div>
+              <div class="mock-row">
+                <div class="mock-input flag" style="--i:2">name@example.com</div>
+                <span class="tag">No label</span>
+              </div>
+              <div class="mock-row">
+                <div class="mock-btn flag" style="--i:3">Sign up</div>
+                <span class="tag">Tab key skips it</span>
+              </div>
+            </div>
+          </div>
+          <figcaption>Four problems FairWeb AI would flag on a sign-up card.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="facts-band" aria-label="Why accessibility matters">
+      <ul class="wrap facts">
+        <li><strong>1 in 6</strong> people worldwide lives with a significant disability (World Health Organization).</li>
+        <li><strong>About 95%</strong> of the top million home pages had detectable failures in WebAIM’s annual survey. Low-contrast text was the most common.</li>
+        <li><strong>Most fixes</strong> are small: a missing attribute, a darker color, a real button instead of a div.</li>
+      </ul>
+    </section>
+
+    <!-- ANALYZER -->
+    <section id="analyzer" class="section" aria-labelledby="analyzer-title">
+      <div class="wrap narrow">
+        <h2 id="analyzer-title">Check a page</h2>
+        <p class="lede">Paste the HTML of a page or component, or upload an .html file. To check a live site, open it, view the page source, and copy everything.</p>
+
+        <label for="html-input" class="field-label">Page HTML</label>
+        <textarea id="html-input" rows="12" spellcheck="false" autocomplete="off" aria-describedby="input-help input-error" placeholder="<!DOCTYPE html>&#10;<html>…"></textarea>
+        <p id="input-help" class="help">Full pages get page-level checks too (language, title, zoom). Snippets are checked as a fragment.</p>
+        <p id="input-error" class="error" role="alert" hidden></p>
+
+        <div class="toolbar">
+          <button type="button" class="btn btn-primary" id="run-check">Check accessibility</button>
+          <button type="button" class="btn" id="load-sample">Load sample page</button>
+          <label class="btn file-btn" for="file-input">Upload .html file</label>
+          <input type="file" id="file-input" accept=".html,.htm,text/html" class="sr-only" tabindex="-1">
+          <button type="button" class="btn btn-quiet" id="clear-input">Clear</button>
+        </div>
+        <p id="status" class="sr-only" role="status" aria-live="polite"></p>
+      </div>
+
+      <!-- RESULTS -->
+      <div class="wrap" id="results-wrap">
+        <section id="results" tabindex="-1" aria-labelledby="results-title" hidden>
+          <h2 id="results-title">Your accessibility report</h2>
+
+          <div class="summary">
+            <div class="score" aria-hidden="true">
+              <svg viewBox="0 0 120 120" class="score-svg" focusable="false">
+                <circle cx="60" cy="60" r="52" class="score-track"></circle>
+                <circle cx="60" cy="60" r="52" class="score-bar" id="score-bar"></circle>
+              </svg>
+              <span class="score-num" id="score-num">0</span>
+            </div>
+            <div class="summary-text">
+              <p class="grade" id="grade"></p>
+              <p id="summary-line"></p>
+              <ul class="sev-counts" id="sev-counts" aria-label="Problems by severity"></ul>
+            </div>
+          </div>
+
+          <h3 class="sub">What we checked</h3>
+          <ul class="cats" id="cats"></ul>
+
+          <div class="notes" id="notes"></div>
+
+          <div class="issues-head">
+            <h3 class="sub" id="issues-title">Problems to fix</h3>
+            <div class="filter" role="group" aria-label="Filter problems by type" id="filters"></div>
+          </div>
+          <div class="expand-row">
+            <button type="button" class="btn btn-quiet" id="expand-all">Expand all</button>
+            <button type="button" class="btn btn-quiet" id="collapse-all">Collapse all</button>
+          </div>
+          <ul class="issues" id="issues"></ul>
+
+          <div id="passed-wrap">
+            <h3 class="sub">What’s already working</h3>
+            <ul class="passed" id="passed"></ul>
+          </div>
+
+          <div class="actions">
+            <h3 class="sub">Take the report with you</h3>
+            <div class="toolbar">
+              <button type="button" class="btn btn-primary" id="dl-html">Download report (HTML)</button>
+              <button type="button" class="btn" id="dl-md">Download report (Markdown)</button>
+              <button type="button" class="btn" id="copy-summary">Copy summary</button>
+              <button type="button" class="btn" id="print-report">Print or save as PDF</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <!-- CONTRAST LAB -->
+    <section id="contrast" class="section band" aria-labelledby="contrast-title">
+      <div class="wrap">
+        <h2 id="contrast-title">Contrast lab</h2>
+        <p class="lede">Pick a text color and a background color. See the ratio against the WCAG levels, and get the closest text color that passes.</p>
+
+        <div class="lab">
+          <div class="lab-controls">
+            <div class="colorfield">
+              <label for="fg-hex">Text color</label>
+              <div class="pair">
+                <input type="color" id="fg-picker" value="#767676" aria-label="Text color picker">
+                <input type="text" id="fg-hex" value="#767676" maxlength="7" spellcheck="false" autocomplete="off" aria-describedby="lab-error">
+              </div>
+            </div>
+            <div class="colorfield">
+              <label for="bg-hex">Background color</label>
+              <div class="pair">
+                <input type="color" id="bg-picker" value="#ffffff" aria-label="Background color picker">
+                <input type="text" id="bg-hex" value="#ffffff" maxlength="7" spellcheck="false" autocomplete="off" aria-describedby="lab-error">
+              </div>
+            </div>
+            <button type="button" class="btn" id="swap-colors">Swap colors</button>
+            <p id="lab-error" class="error" role="alert" hidden></p>
+          </div>
+
+          <div class="lab-result">
+            <p class="ratio" id="ratio" aria-live="polite">–</p>
+            <ul class="levels" id="levels"></ul>
+            <p id="lab-suggest"></p>
+            <button type="button" class="btn btn-primary" id="apply-suggest" hidden>Use suggested color</button>
+          </div>
+
+          <div class="lab-preview" id="lab-preview">
+            <p class="preview-large">Large text sample, 24px</p>
+            <p>Body text sample. The five boxing wizards jump quickly, and every one of them can read this.</p>
+            <p class="preview-small">Small print sample, 14px</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LEARN -->
+    <section id="learn" class="section" aria-labelledby="learn-title">
+      <div class="wrap">
+        <h2 id="learn-title">Who this helps, and what breaks for them</h2>
+        <div class="people">
+          <article>
+            <h3>People who use screen readers</h3>
+            <p>Software reads the page aloud. It needs alt text, form labels, link text that makes sense alone, and a clear heading outline.</p>
+          </article>
+          <article>
+            <h3>People who use only a keyboard</h3>
+            <p>This includes people with motor impairments and anyone with a broken wrist or trackpad. Everything must be reachable with Tab, and the focus must be visible.</p>
+          </article>
+          <article>
+            <h3>People with low vision or color-vision differences</h3>
+            <p>They need strong contrast, text that scales when zoomed, and meaning that isn’t carried by color alone.</p>
+          </article>
+          <article>
+            <h3>Everyone else, some of the time</h3>
+            <p>Phone in bright sunlight, noisy train, one hand full. Accessible design is just design that holds up in real life.</p>
+          </article>
+        </div>
+
+        <div class="kbtest">
+          <h3>Try the 60-second keyboard test on your own site</h3>
+          <ol>
+            <li>Put your mouse aside and open your page.</li>
+            <li>Press Tab repeatedly. You should always see where you are.</li>
+            <li>Press Enter on links and Space on buttons. Everything clickable should work.</li>
+            <li>Press Shift + Tab to go back. The order should follow the page from top to bottom.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABOUT -->
+    <section id="about" class="section band" aria-labelledby="about-title">
+      <div class="wrap about-grid">
+        <div>
+          <h2 id="about-title">About FairWeb AI</h2>
+          <p>The web only works if people can use it. Most accessibility tools are written for specialists. FairWeb AI is written for the developer who has never heard of WCAG and still wants to do the right thing.</p>
+          <p>Every problem comes with the same four answers: what is wrong, who it affects, how to fix it, and what it sounds like to a screen reader.</p>
+        </div>
+        <div>
+          <h3>What it checks</h3>
+          <ul class="plain-list">
+            <li><strong>Contrast.</strong> Real computed colors, including inherited backgrounds and transparency.</li>
+            <li><strong>Images.</strong> Missing, empty-by-mistake, and file-name alt text.</li>
+            <li><strong>Forms.</strong> Missing labels, placeholder-only fields, ungrouped radios.</li>
+            <li><strong>Keyboard.</strong> Click handlers on divs, removed focus outlines, bad tab order, unnamed links and buttons.</li>
+            <li><strong>Structure.</strong> Language, title, zoom, headings, landmarks, tables, frames.</li>
+          </ul>
+          <h3>Honest limits</h3>
+          <p>Automated checks find some barriers, not all. Use this as a fast first pass, then test with a keyboard and a screen reader.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p><strong>FairWeb AI</strong>: a hackathon project for a more inclusive web. Built with plain HTML, CSS and JavaScript.</p>
+      <p>This site is designed to meet WCAG 2.2 AA. If you find a barrier, please tell us so we can fix it.</p>
+    </div>
+  </footer>
+
+  <script>
+/* A deliberately inaccessible page, used for the "Try a sample" demo. */
+window.FAIRWEB_SAMPLE = [
+'<!DOCTYPE html>',
+'<html>',
+'<head>',
+'<meta charset="utf-8">',
+'<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">',
+'<style>',
+'  body { font-family: Arial, sans-serif; margin: 0; background: #ffffff; color: #222222; }',
+'  header { background: #0b3d91; padding: 16px; }',
+'  header a { color: #8fb0f0; margin-right: 16px; text-decoration: none; }',
+'  .hero { padding: 24px; }',
+'  .muted { color: #9a9a9a; }',
+'  .promo { background: #ffd54f; color: #f5f5f5; padding: 12px; }',
+'  .buy { background: #2e7d32; color: #ffffff; padding: 10px 16px; display: inline-block; cursor: pointer; }',
+'  .small { font-size: 10px; }',
+'  a:focus, button:focus, input:focus { outline: none; }',
+'</style>',
+'</head>',
+'<body>',
+'<header>',
+'  <a href="/">Home</a> <a href="/shop">Shop</a> <a href="/about">About</a>',
+'  <a href="/contact">Contact</a> <a href="/blog">Blog</a> <a href="/faq">FAQ</a>',
+'</header>',
+'',
+'<div class="hero">',
+'  <h1>Greenbasket</h1>',
+'  <h3>Fresh produce, delivered</h3>',
+'  <img src="hero-banner-final-v2.jpg" width="600" height="160">',
+'  <img src="logo.png" alt="Greenbasket logo" width="40" height="40">',
+'  <img src="basket.png" alt="image" width="40" height="40">',
+'  <p class="muted">Order before 9am for same-day delivery to your door.</p>',
+'  <p class="promo">Spring sale: 20% off your first box</p>',
+'  <a href="/sale"><img src="sale-badge.png" alt="" width="40" height="40"></a>',
+'  <a href="/box">Click here</a>',
+'  <a onclick="openCart()">View cart</a>',
+'  <div class="buy" onclick="buy()">Buy now</div>',
+'  <button type="button"><svg width="16" height="16" aria-hidden="true"><circle cx="8" cy="8" r="6"></circle></svg></button>',
+'  <video src="promo.mp4" autoplay></video>',
+'</div>',
+'',
+'<form>',
+'  <input type="text" placeholder="Your name">',
+'  <input type="email" id="email">',
+'  <label>Phone <input type="tel"></label>',
+'  <label for="city">City</label>',
+'  <select id="city"><option>Pune</option><option>Mumbai</option></select>',
+'  <p>Delivery speed</p>',
+'  <input type="radio" name="speed" value="std"> Standard',
+'  <input type="radio" name="speed" value="fast"> Express',
+'  <input type="text" tabindex="3" aria-label="Promo code">',
+'  <input type="submit" value="Send">',
+'</form>',
+'',
+'<iframe src="about:blank" width="300" height="120"></iframe>',
+'',
+'<table>',
+'  <tr><td>Item</td><td>Price</td></tr>',
+'  <tr><td>Apples</td><td>Rs 120</td></tr>',
+'</table>',
+'',
+'<div id="note">A</div><div id="note">B</div>',
+'<p class="small">Terms apply. Delivery times may vary.</p>',
+'</body>',
+'</html>'
+].join('\n');
+
+</script>
+  <script>
+/* FairWeb AI – checking engine.
+   Renders the pasted HTML in a hidden, script-free sandboxed frame so we can read real
+   computed styles (colors, sizes), then runs rule checks against it.
+   Everything runs locally in the browser. */
+(function (global) {
+  'use strict';
+
+  var CATS = {
+    contrast: 'Contrast',
+    images: 'Images',
+    forms: 'Forms',
+    keyboard: 'Keyboard and controls',
+    structure: 'Page structure'
+  };
+  var SEV_ORDER = ['critical', 'serious', 'moderate', 'minor'];
+  var SEV_LABEL = { critical: 'Critical', serious: 'Serious', moderate: 'Moderate', minor: 'Minor' };
+  var SEV_WEIGHT = { critical: 12, serious: 8, moderate: 4, minor: 2 };
+
+  /* ---------- Plain-language knowledge base ---------- */
+  var RULES = {
+    'img-alt-missing': {
+      sev: 'serious', cat: 'images', title: 'Image has no alt text', wcag: '1.1.1 Non-text Content (A)',
+      plain: 'Screen readers can’t see pictures. When an image has no alt attribute, many screen readers read out the file name instead, or skip the image, so blind visitors miss what it shows.',
+      why: 'Affects people who are blind or have low vision, and anyone whose images fail to load.',
+      fix: 'Add an alt attribute that says what the image shows or does. If the image is purely decoration, use an empty alt (alt="") so screen readers skip it.',
+      code: '<img src="hero.jpg" alt="Volunteers sorting vegetables at a community kitchen">',
+      srBefore: '“image, hero-banner-final-v2.jpg”', srAfter: '“image, Volunteers sorting vegetables at a community kitchen”'
+    },
+    'img-alt-bad': {
+      sev: 'moderate', cat: 'images', title: 'Alt text is a file name or a vague word', wcag: '1.1.1 Non-text Content (A)',
+      plain: 'Alt text like “image” or “IMG_2041.jpg” tells people nothing. Good alt text answers one question: how would I describe this picture to someone over the phone?',
+      why: 'Affects people who are blind or have low vision.',
+      fix: 'Replace it with a short, specific description. Don’t start with “image of”: the screen reader already says it’s an image.',
+      code: '<img src="basket.png" alt="Wicker basket full of fresh vegetables">',
+      srBefore: '“image, image”', srAfter: '“image, Wicker basket full of fresh vegetables”'
+    },
+    'svg-no-name': {
+      sev: 'moderate', cat: 'images', title: 'Informative graphic has no name', wcag: '1.1.1 Non-text Content (A)',
+      plain: 'An SVG marked as an image has no name, so a screen reader announces “image” with no description of what it shows.',
+      why: 'Affects people who are blind or have low vision.',
+      fix: 'Add an aria-label or a <title> inside the SVG. If it is only decoration, use aria-hidden="true" instead of role="img".',
+      code: '<svg role="img" aria-label="Sales up 20% this quarter">…</svg>',
+      srBefore: '“image”', srAfter: '“Sales up 20% this quarter, image”'
+    },
+    'form-label-missing': {
+      sev: 'critical', cat: 'forms', title: 'Form field has no label', wcag: '1.3.1, 3.3.2, 4.1.2 (A)',
+      plain: 'A label tells people what to type. Without one, a screen reader just says “edit text”, and voice-control users can’t say the field’s name to jump to it. A real label is also a bigger click target.',
+      why: 'Affects screen reader, voice control and screen magnifier users, and people with motor impairments.',
+      fix: 'Connect a visible <label> to the field with for and id, or wrap the field inside the label.',
+      code: '<label for="email">Email address</label>\n<input type="email" id="email" name="email">',
+      srBefore: '“edit text”', srAfter: '“Email address, edit text”'
+    },
+    'form-label-placeholder': {
+      sev: 'serious', cat: 'forms', title: 'Field only has placeholder text', wcag: '3.3.2 Labels or Instructions (A)',
+      plain: 'Placeholder text vanishes as soon as someone starts typing, is often too faint to read, and isn’t reliably announced as a label. People lose track of what the field wanted.',
+      why: 'Affects screen reader users, people with memory or attention difficulties, and people with low vision.',
+      fix: 'Keep the placeholder as an example if you like, but add a real visible label above the field.',
+      code: '<label for="name">Your name</label>\n<input type="text" id="name" placeholder="e.g. Asha Patil">',
+      srBefore: '“edit text” (placeholder may be skipped)', srAfter: '“Your name, edit text”'
+    },
+    'form-radio-group': {
+      sev: 'moderate', cat: 'forms', title: 'Radio buttons are not grouped with a question', wcag: '1.3.1 Info and Relationships (A)',
+      plain: 'Radio buttons answer one shared question. Without a group, a screen reader user hears “Standard, radio button” but never hears what the question is.',
+      why: 'Affects screen reader users.',
+      fix: 'Wrap the radio buttons in a <fieldset> with a <legend> that states the question.',
+      code: '<fieldset>\n  <legend>Delivery speed</legend>\n  <label><input type="radio" name="speed" value="std"> Standard</label>\n  <label><input type="radio" name="speed" value="fast"> Express</label>\n</fieldset>',
+      srBefore: '“Standard, radio button”', srAfter: '“Delivery speed, group. Standard, radio button”'
+    },
+    'kb-click-nonint': {
+      sev: 'serious', cat: 'keyboard', title: 'Clickable element can’t be reached with a keyboard', wcag: '2.1.1 Keyboard (A), 4.1.2 (A)',
+      plain: 'A <div> or <span> with a click handler looks like a button to mouse users, but the Tab key skips it and Enter or Space do nothing. Keyboard users are locked out of that action.',
+      why: 'Affects people who can’t use a mouse: keyboard, switch and voice users, and many screen reader users.',
+      fix: 'Use a real <button> (or <a href> for navigation). You get focus, Enter and Space support, and the right role for free.',
+      code: '<button type="button" onclick="buy()">Buy now</button>',
+      srBefore: '“Buy now” (no hint that it can be clicked)', srAfter: '“Buy now, button”'
+    },
+    'kb-link-no-href': {
+      sev: 'serious', cat: 'keyboard', title: 'Link has no destination, so Tab skips it', wcag: '2.1.1 Keyboard (A)',
+      plain: 'An <a> without an href isn’t focusable. If it runs an action (like opening a cart), keyboard users can never reach it.',
+      why: 'Affects keyboard, switch and screen reader users.',
+      fix: 'If it goes somewhere, add an href. If it runs an action, make it a <button type="button">.',
+      code: '<button type="button" onclick="openCart()">View cart</button>',
+      srBefore: '“View cart” (plain text, not focusable)', srAfter: '“View cart, button”'
+    },
+    'kb-positive-tabindex': {
+      sev: 'moderate', cat: 'keyboard', title: 'tabindex above 0 scrambles the Tab order', wcag: '2.4.3 Focus Order (A)',
+      plain: 'A tabindex greater than 0 pulls that element to the front of the Tab order, so focus jumps around the page in a confusing sequence.',
+      why: 'Affects keyboard and screen reader users.',
+      fix: 'Remove it and put elements in a sensible order in the HTML. Use tabindex="0" only to make a custom control focusable in its natural place.',
+      code: '<input type="text" aria-label="Promo code">',
+      srBefore: 'Focus jumps to this field before the first link on the page', srAfter: 'Focus follows the page from top to bottom'
+    },
+    'kb-focus-removed': {
+      sev: 'serious', cat: 'keyboard', title: 'Focus outline is removed', wcag: '2.4.7 Focus Visible (AA)',
+      plain: 'When someone presses Tab, the outline shows where they are. Removing it (outline: none) with nothing in its place is like hiding the mouse cursor.',
+      why: 'Affects keyboard users and people with low vision who track focus on screen.',
+      fix: 'Delete the rule, or replace the outline with a clear style using :focus-visible, which only appears for keyboard users.',
+      code: ':focus-visible {\n  outline: 3px solid #0b3d91;\n  outline-offset: 2px;\n}',
+      srBefore: 'Not applicable (this is a visual problem)', srAfter: 'Not applicable'
+    },
+    'kb-no-skip-link': {
+      sev: 'minor', cat: 'keyboard', title: 'No “skip to main content” link', wcag: '2.4.1 Bypass Blocks (A)',
+      plain: 'Keyboard users must Tab through every menu link on every page before reaching the content. A skip link lets them jump straight to it.',
+      why: 'Affects keyboard and screen reader users.',
+      fix: 'Add a link as the very first focusable item that jumps to your <main> element.',
+      code: '<a class="skip" href="#main">Skip to main content</a>\n…\n<main id="main">…</main>',
+      srBefore: 'Six menu links, then the content', srAfter: '“Skip to main content, link” as the first stop'
+    },
+    'link-no-name': {
+      sev: 'critical', cat: 'keyboard', title: 'Link has no readable name', wcag: '2.4.4 Link Purpose (A), 4.1.2 (A)',
+      plain: 'A screen reader announces just “link” and nothing else, so people can’t tell where it goes. This usually happens with icon-only or image-only links.',
+      why: 'Affects screen reader and voice control users.',
+      fix: 'Add visible link text. For an image link, give the image meaningful alt text. For an icon, add an aria-label.',
+      code: '<a href="/sale"><img src="sale-badge.png" alt="Spring sale: 20% off"></a>',
+      srBefore: '“link”', srAfter: '“Spring sale: 20% off, link”'
+    },
+    'link-generic': {
+      sev: 'moderate', cat: 'keyboard', title: 'Link text is vague (“click here”, “read more”)', wcag: '2.4.4 Link Purpose (A)',
+      plain: 'Screen reader users often pull up a list of every link on a page. A list full of “click here” says nothing about where any of them go.',
+      why: 'Affects screen reader users, and anyone scanning for links.',
+      fix: 'Make the link text describe the destination.',
+      code: '<a href="/box">See this week’s vegetable box</a>',
+      srBefore: '“Click here, link”', srAfter: '“See this week’s vegetable box, link”'
+    },
+    'button-no-name': {
+      sev: 'critical', cat: 'keyboard', title: 'Button has no readable name', wcag: '4.1.2 Name, Role, Value (A)',
+      plain: 'An icon-only button sounds like just “button” to a screen reader, so people can’t tell whether it saves, deletes or buys.',
+      why: 'Affects screen reader and voice control users.',
+      fix: 'Add visible text, or an aria-label that says what the button does.',
+      code: '<button type="button" aria-label="Open search">\n  <svg aria-hidden="true">…</svg>\n</button>',
+      srBefore: '“button”', srAfter: '“Open search, button”'
+    },
+    'media-autoplay': {
+      sev: 'serious', cat: 'keyboard', title: 'Media starts playing on its own', wcag: '1.4.2 Audio Control (A), 2.2.2 Pause, Stop, Hide (A)',
+      plain: 'Sudden sound makes it hard to hear a screen reader, and motion can distract or even make people unwell. People need a way to stop it.',
+      why: 'Affects screen reader users, people with attention difficulties, and people sensitive to motion.',
+      fix: 'Remove autoplay, or mute the video and give it visible controls so people can pause it.',
+      code: '<video src="promo.mp4" controls muted></video>',
+      srBefore: 'Audio plays over the screen reader’s voice', srAfter: 'Nothing plays until the visitor presses play'
+    },
+    'media-no-captions': {
+      sev: 'moderate', cat: 'keyboard', title: 'Video has no captions track', wcag: '1.2.2 Captions (Prerecorded) (A)',
+      plain: 'People who are deaf or hard of hearing, or watching with the sound off, can’t follow a video that has no captions.',
+      why: 'Affects people who are deaf or hard of hearing, and anyone in a noisy or quiet place.',
+      fix: 'Add a captions file with a <track> element.',
+      code: '<video src="promo.mp4" controls>\n  <track kind="captions" src="captions.vtt" srclang="en" label="English">\n</video>',
+      srBefore: 'Not applicable (this is about captions)', srAfter: 'Not applicable'
+    },
+    'hidden-focusable': {
+      sev: 'serious', cat: 'keyboard', title: 'Hidden content can still receive focus', wcag: '4.1.2 Name, Role, Value (A)',
+      plain: 'aria-hidden="true" hides content from screen readers, but keyboard focus can still land inside it, so a screen reader user focuses on “nothing”.',
+      why: 'Affects screen reader and keyboard users.',
+      fix: 'Remove aria-hidden, or also make everything inside unfocusable (use the hidden or inert attribute).',
+      code: '<div hidden>…</div>',
+      srBefore: 'Focus lands on an element the screen reader says nothing about', srAfter: 'Hidden content is skipped by both Tab and the screen reader'
+    },
+    'contrast-low': {
+      sev: 'serious', cat: 'contrast', title: 'Text contrast is too low', wcag: '1.4.3 Contrast (Minimum) (AA)',
+      plain: 'Light text on a light background (or dark on dark) is hard or impossible to read for people with low vision or color-vision differences, and for anyone using a phone in bright sunlight.',
+      why: 'Affects people with low vision, older adults, and anyone in poor lighting.',
+      fix: 'Darken the text (or lighten it on dark backgrounds) until the ratio reaches 4.5 : 1 for normal text, or 3 : 1 for large text (24px and up, or 18.66px and up in bold).',
+      code: null, srBefore: null, srAfter: null
+    },
+    'contrast-very-low': {
+      sev: 'critical', cat: 'contrast', title: 'Text is almost invisible', wcag: '1.4.3 Contrast (Minimum) (AA)',
+      plain: 'The text color is so close to the background that many people won’t be able to read it at all.',
+      why: 'Affects people with low vision, color-vision differences, and anyone in poor lighting.',
+      fix: 'Pick a much darker (or lighter) text color. Aim for at least 4.5 : 1 for normal text, or 3 : 1 for large text.',
+      code: null, srBefore: null, srAfter: null
+    },
+    'contrast-image': {
+      sev: 'minor', cat: 'contrast', title: 'Text sits on a background image or gradient (check by eye)', wcag: '1.4.3 Contrast (Minimum) (AA)',
+      plain: 'Automated tools can’t measure contrast when text is over a picture or gradient, because the color underneath changes from place to place.',
+      why: 'Affects people with low vision.',
+      fix: 'Check the lightest and darkest parts of the image by eye, or put a solid or semi-opaque panel behind the text.',
+      code: '.hero-text {\n  background: rgba(0, 0, 0, 0.65);\n  color: #ffffff;\n}',
+      srBefore: null, srAfter: null
+    },
+    'doc-lang': {
+      sev: 'serious', cat: 'structure', title: 'Page language is not set', wcag: '3.1.1 Language of Page (A)',
+      plain: 'Screen readers choose a pronunciation voice from the lang attribute. Without it, an English page may be read in the wrong accent, or in a different language entirely.',
+      why: 'Affects screen reader users and people using translation tools.',
+      fix: 'Add a lang attribute to the <html> tag.',
+      code: '<html lang="en">',
+      srBefore: 'Words read with the wrong accent', srAfter: 'Words read in the right language'
+    },
+    'doc-title': {
+      sev: 'serious', cat: 'structure', title: 'Page has no title', wcag: '2.4.2 Page Titled (A)',
+      plain: 'The title is the first thing a screen reader says, and the label on every browser tab and bookmark. Without it people can’t tell which tab is which.',
+      why: 'Affects screen reader users, and anyone with many tabs open.',
+      fix: 'Add a short, unique <title> inside the <head>.',
+      code: '<title>Greenbasket – Fresh produce delivered</title>',
+      srBefore: '“untitled” or the file address', srAfter: '“Greenbasket – Fresh produce delivered”'
+    },
+    'doc-viewport': {
+      sev: 'serious', cat: 'structure', title: 'Page blocks zooming on mobile', wcag: '1.4.4 Resize Text (AA)',
+      plain: 'user-scalable=no (or a low maximum-scale) stops people from pinching to zoom. People with low vision rely on zoom to read.',
+      why: 'Affects people with low vision.',
+      fix: 'Remove user-scalable=no and maximum-scale from the viewport tag.',
+      code: '<meta name="viewport" content="width=device-width, initial-scale=1">',
+      srBefore: 'Not applicable (this is a visual problem)', srAfter: 'Not applicable'
+    },
+    'heading-no-h1': {
+      sev: 'moderate', cat: 'structure', title: 'Page has no main heading (h1)', wcag: '1.3.1, 2.4.6 (A, AA)',
+      plain: 'Screen reader users jump between headings to scan a page, and the h1 is the “you are here” signpost.',
+      why: 'Affects screen reader users.',
+      fix: 'Add one <h1> that names the page.',
+      code: '<h1>Greenbasket</h1>',
+      srBefore: 'No “heading level 1” anywhere', srAfter: '“Greenbasket, heading level 1”'
+    },
+    'heading-multi-h1': {
+      sev: 'minor', cat: 'structure', title: 'More than one h1', wcag: '1.3.1 Info and Relationships (A)',
+      plain: 'One h1 per page keeps the outline clear. With several, it isn’t obvious which is the page’s main topic.',
+      why: 'Affects screen reader users.',
+      fix: 'Keep one h1 and turn the others into h2 or lower.',
+      code: '<h1>Greenbasket</h1>\n<h2>Today’s picks</h2>',
+      srBefore: 'Two “heading level 1” entries', srAfter: 'One main heading, then sections'
+    },
+    'heading-skip': {
+      sev: 'moderate', cat: 'structure', title: 'Heading levels jump (for example h1 to h3)', wcag: '1.3.1 Info and Relationships (A)',
+      plain: 'Headings are an outline. Skipping a level is like a book going from chapter 1 straight to section 1.1.1: people wonder if content is missing.',
+      why: 'Affects screen reader users.',
+      fix: 'Use the next level down, and change the size with CSS if you want it to look different.',
+      code: '<h1>Greenbasket</h1>\n<h2>Fresh produce, delivered</h2>',
+      srBefore: '“heading level 1” then “heading level 3”', srAfter: '“heading level 1” then “heading level 2”'
+    },
+    'heading-empty': {
+      sev: 'moderate', cat: 'structure', title: 'Heading is empty', wcag: '1.3.1 Info and Relationships (A)',
+      plain: 'An empty heading is announced as a heading with nothing in it, which is just noise when someone is navigating by headings.',
+      why: 'Affects screen reader users.',
+      fix: 'Add text to the heading, or remove the tag.',
+      code: '<h2>Our story</h2>',
+      srBefore: '“heading level 2” (nothing follows)', srAfter: '“Our story, heading level 2”'
+    },
+    'landmark-main': {
+      sev: 'minor', cat: 'structure', title: 'No <main> landmark', wcag: '1.3.1, 2.4.1 (A)',
+      plain: 'Landmarks like <main>, <nav> and <header> let screen reader users jump straight to the part of the page they want.',
+      why: 'Affects screen reader and keyboard users.',
+      fix: 'Wrap the page’s primary content in a <main> element.',
+      code: '<main id="main">\n  …\n</main>',
+      srBefore: 'No “main” landmark to jump to', srAfter: '“main landmark”'
+    },
+    'iframe-title': {
+      sev: 'serious', cat: 'structure', title: 'Frame has no title', wcag: '4.1.2 Name, Role, Value (A)',
+      plain: 'Screen readers announce an iframe by its title. Without one it’s just “frame”, and people can’t tell whether it’s worth entering.',
+      why: 'Affects screen reader users.',
+      fix: 'Add a title that says what the frame contains.',
+      code: '<iframe src="map.html" title="Map of delivery areas"></iframe>',
+      srBefore: '“frame”', srAfter: '“Map of delivery areas, frame”'
+    },
+    'table-headers': {
+      sev: 'moderate', cat: 'structure', title: 'Data table has no header cells', wcag: '1.3.1 Info and Relationships (A)',
+      plain: 'Screen readers read each cell together with its column and row headings (“Price, Apples, 120”). Without <th> cells people hear bare numbers with no context.',
+      why: 'Affects screen reader users.',
+      fix: 'Use <th scope="col"> for column headings and <th scope="row"> for row headings.',
+      code: '<table>\n  <tr><th scope="col">Item</th><th scope="col">Price</th></tr>\n  <tr><td>Apples</td><td>Rs 120</td></tr>\n</table>',
+      srBefore: '“Apples … 120”', srAfter: '“Price, Apples, 120”'
+    },
+    'dup-id': {
+      sev: 'moderate', cat: 'structure', title: 'Two elements share the same id', wcag: '1.3.1 Info and Relationships (A)',
+      plain: 'Each id must be unique. When two elements share one, labels and links that point to it can attach to the wrong thing.',
+      why: 'Affects screen reader users and anyone relying on labels or in-page links.',
+      fix: 'Give every element its own id.',
+      code: '<div id="note-1">A</div>\n<div id="note-2">B</div>',
+      srBefore: 'A label may be read for the wrong field', srAfter: 'Each label belongs to exactly one field'
+    },
+    'text-tiny': {
+      sev: 'minor', cat: 'structure', title: 'Text is very small', wcag: 'Best practice, relates to 1.4.4 Resize Text (AA)',
+      plain: 'Text under about 12px is hard to read for many people, especially on phones.',
+      why: 'Affects people with low vision, older adults, and anyone on a small screen.',
+      fix: 'Use at least 16px (1rem) for body text, and 12px as an absolute minimum for fine print.',
+      code: '.small { font-size: 0.875rem; }',
+      srBefore: null, srAfter: null
+    }
+  };
+
+  /* ---------- Color math (WCAG 2.x) ---------- */
+  function lin(c) { c = c / 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); }
+  function lum(c) { return 0.2126 * lin(c.r) + 0.7152 * lin(c.g) + 0.0722 * lin(c.b); }
+  function ratio(a, b) {
+    var l1 = lum(a), l2 = lum(b);
+    return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+  }
+  function blend(fg, bg) {
+    var a = fg.a === undefined ? 1 : fg.a;
+    return { r: fg.r * a + bg.r * (1 - a), g: fg.g * a + bg.g * (1 - a), b: fg.b * a + bg.b * (1 - a), a: 1 };
+  }
+  function toHex(c) {
+    return '#' + [c.r, c.g, c.b].map(function (v) {
+      return Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0');
+    }).join('');
+  }
+  function parseHex(h) {
+    h = String(h || '').trim().replace(/^#/, '');
+    if (h.length === 3) h = h.split('').map(function (c) { return c + c; }).join('');
+    if (!/^[0-9a-fA-F]{6}$/.test(h)) return null;
+    return { r: parseInt(h.slice(0, 2), 16), g: parseInt(h.slice(2, 4), 16), b: parseInt(h.slice(4, 6), 16), a: 1 };
+  }
+  // Nudge the text color toward black or white (whichever contrasts more) until it passes.
+  function suggest(fg, bg, target) {
+    var black = { r: 0, g: 0, b: 0 }, white = { r: 255, g: 255, b: 255 };
+    var end = ratio(black, bg) >= ratio(white, bg) ? black : white;
+    for (var t = 0; t <= 1.0001; t += 0.01) {
+      var c = { r: fg.r + (end.r - fg.r) * t, g: fg.g + (end.g - fg.g) * t, b: fg.b + (end.b - fg.b) * t, a: 1 };
+      c = { r: Math.round(c.r), g: Math.round(c.g), b: Math.round(c.b), a: 1 };
+      if (ratio(c, bg) >= target) return c;
+    }
+    return end;
+  }
+  function floor2(n) { return Math.floor(n * 100) / 100; }
+
+  /* ---------- DOM helpers ---------- */
+  function textOf(el) { return (el.textContent || '').replace(/\s+/g, ' ').trim(); }
+
+  function labelText(label) {
+    var clone = label.cloneNode(true);
+    var c = clone.querySelectorAll('input,select,textarea,button');
+    for (var i = 0; i < c.length; i++) c[i].parentNode.removeChild(c[i]);
+    return textOf(clone);
+  }
+
+  function accName(el, doc) {
+    var lb = el.getAttribute('aria-labelledby');
+    if (lb) {
+      var t = lb.split(/\s+/).map(function (id) { var n = doc.getElementById(id); return n ? textOf(n) : ''; }).join(' ').trim();
+      if (t) return t;
+    }
+    var al = (el.getAttribute('aria-label') || '').trim();
+    if (al) return al;
+    var txt = textOf(el);
+    if (txt) return txt;
+    var imgs = el.querySelectorAll('img[alt],[role="img"][aria-label]');
+    for (var i = 0; i < imgs.length; i++) {
+      var v = (imgs[i].getAttribute('alt') || imgs[i].getAttribute('aria-label') || '').trim();
+      if (v) return v;
+    }
+    var st = el.querySelector('svg title');
+    if (st && textOf(st)) return textOf(st);
+    var ti = (el.getAttribute('title') || '').trim();
+    if (ti) return ti;
+    return '';
+  }
+
+  // 'ok' | 'weak' (placeholder / title only) | 'none'
+  function fieldLabelState(f, doc) {
+    if ((f.getAttribute('aria-label') || '').trim()) return 'ok';
+    var lb = f.getAttribute('aria-labelledby');
+    if (lb) {
+      var t = lb.split(/\s+/).map(function (id) { var n = doc.getElementById(id); return n ? textOf(n) : ''; }).join('').trim();
+      if (t) return 'ok';
+    }
+    if (f.id) {
+      var labels = doc.getElementsByTagName('label');
+      for (var i = 0; i < labels.length; i++) {
+        if (labels[i].getAttribute('for') === f.id && labelText(labels[i])) return 'ok';
+      }
+    }
+    var wrap = f.closest ? f.closest('label') : null;
+    if (wrap && labelText(wrap)) return 'ok';
+    if ((f.getAttribute('title') || '').trim() || (f.getAttribute('placeholder') || '').trim()) return 'weak';
+    return 'none';
+  }
+
+  function openTag(el) {
+    var m = el.outerHTML.match(/^<[^>]*>/);
+    var s = m ? m[0] : '<' + el.tagName.toLowerCase() + '>';
+    return s.length > 150 ? s.slice(0, 147) + '…>' : s;
+  }
+  function snippet(el) {
+    var html = el.outerHTML.replace(/\s+/g, ' ');
+    if (html.length <= 170) return html;
+    return openTag(el) + '…</' + el.tagName.toLowerCase() + '>';
+  }
+  function selectorOf(el) {
+    var parts = [], n = el;
+    while (n && n.nodeType === 1 && parts.length < 3 && n.tagName !== 'BODY' && n.tagName !== 'HTML') {
+      var s = n.tagName.toLowerCase();
+      if (n.id) { parts.unshift(s + '#' + n.id); break; }
+      var cls = (n.getAttribute('class') || '').trim().split(/\s+/)[0];
+      if (cls) s += '.' + cls;
+      parts.unshift(s);
+      n = n.parentElement;
+    }
+    return parts.join(' > ');
+  }
+
+  /* ---------- The analysis ---------- */
+  function run(doc, win, ctx, layout, isFragment) {
+    var st = {};
+    Object.keys(CATS).forEach(function (k) { st[k] = { total: 0, bad: 0 }; });
+    var map = {}, order = [];
+
+    function add(ruleId, el, extra, exampleObj) {
+      extra = extra || {};
+      var key = extra.key || ruleId;
+      var it = map[key];
+      if (!it) { it = { key: key, rule: ruleId, count: 0, examples: [], extra: extra }; map[key] = it; order.push(it); }
+      it.count++;
+      if (it.examples.length < 3) {
+        if (el) it.examples.push({ selector: selectorOf(el), snippet: snippet(el) });
+        else if (exampleObj) it.examples.push(exampleObj);
+      }
+      st[RULES[ruleId].cat].bad++;
+    }
+    function seen(cat, n) { st[cat].total += (n === undefined ? 1 : n); }
+    function has(ruleId) { return order.some(function (i) { return i.rule === ruleId; }); }
+
+    function parseColor(str) {
+      ctx.clearRect(0, 0, 1, 1);
+      ctx.fillStyle = '#000000';
+      ctx.fillStyle = str;
+      ctx.fillRect(0, 0, 1, 1);
+      var d = ctx.getImageData(0, 0, 1, 1).data;
+      return { r: d[0], g: d[1], b: d[2], a: d[3] / 255 };
+    }
+    function rendered(el) {
+      if (!layout) return true;
+      for (var n = el; n && n.nodeType === 1 && n !== doc.documentElement; n = n.parentElement) {
+        var cs = win.getComputedStyle(n);
+        if (cs.display === 'none') return false;
+        if (n === el && cs.visibility === 'hidden') return false;
+      }
+      return true;
+    }
+    function effectiveBg(el) {
+      var layers = [], hasImage = false, n = el;
+      while (n && n.nodeType === 1) {
+        var cs = win.getComputedStyle(n);
+        if (cs.backgroundImage && cs.backgroundImage !== 'none') hasImage = true;
+        var c = parseColor(cs.backgroundColor);
+        if (c.a > 0) { layers.push(c); if (c.a >= 1) break; }
+        n = n.parentElement;
+      }
+      var base = { r: 255, g: 255, b: 255, a: 1 };
+      for (var i = layers.length - 1; i >= 0; i--) base = blend(layers[i], base);
+      return { color: base, hasImage: hasImage };
+    }
+
+    var i, el;
+
+    /* Images */
+    var imgs = doc.querySelectorAll('img');
+    for (i = 0; i < imgs.length; i++) {
+      el = imgs[i];
+      var role = (el.getAttribute('role') || '').toLowerCase();
+      if (el.getAttribute('aria-hidden') === 'true' || role === 'presentation' || role === 'none') continue;
+      if (layout && win.getComputedStyle(el).display === 'none') continue;
+      seen('images');
+      if (!el.hasAttribute('alt')) {
+        if (!(el.getAttribute('aria-label') || el.getAttribute('aria-labelledby'))) add('img-alt-missing', el);
+      } else {
+        var alt = el.getAttribute('alt').trim();
+        if (alt && (/\.(jpe?g|png|gif|webp|svg|avif|bmp)$/i.test(alt) || /^(img|dsc|image)[_-]?\d{3,}/i.test(alt) ||
+            /^(image|img|photo|picture|pic|graphic|icon|banner|untitled|spacer)[\s_-]*\d*$/i.test(alt))) {
+          add('img-alt-bad', el);
+        }
+      }
+    }
+    var svgs = doc.querySelectorAll('svg[role="img"]');
+    for (i = 0; i < svgs.length; i++) {
+      el = svgs[i]; seen('images');
+      if (!(el.getAttribute('aria-label') || el.getAttribute('aria-labelledby') || el.querySelector('title'))) add('svg-no-name', el);
+    }
+
+    /* Forms */
+    var fields = doc.querySelectorAll('input, select, textarea');
+    for (i = 0; i < fields.length; i++) {
+      el = fields[i];
+      var type = (el.getAttribute('type') || 'text').toLowerCase();
+      if (el.tagName === 'INPUT' && ['hidden', 'submit', 'button', 'reset', 'image'].indexOf(type) > -1) continue;
+      if (!rendered(el)) continue;
+      seen('forms');
+      var state = fieldLabelState(el, doc);
+      if (state === 'none') add('form-label-missing', el);
+      else if (state === 'weak') add('form-label-placeholder', el);
+    }
+    var radios = {};
+    var rs = doc.querySelectorAll('input[type="radio"][name]');
+    for (i = 0; i < rs.length; i++) { (radios[rs[i].name] = radios[rs[i].name] || []).push(rs[i]); }
+    Object.keys(radios).forEach(function (name) {
+      var g = radios[name];
+      if (g.length < 2) return;
+      seen('forms');
+      if (!g[0].closest('fieldset,[role="radiogroup"],[role="group"]')) add('form-radio-group', g[0]);
+    });
+
+    /* Keyboard and controls */
+    var interactive = doc.querySelectorAll('a, button, [onclick], [tabindex], summary, [role="button"], [role="link"]');
+    seen('keyboard', interactive.length);
+
+    var clickable = doc.querySelectorAll('[onclick]');
+    for (i = 0; i < clickable.length; i++) {
+      el = clickable[i];
+      if (['A', 'BUTTON', 'INPUT', 'SELECT', 'TEXTAREA', 'SUMMARY', 'LABEL'].indexOf(el.tagName) > -1) continue;
+      var ti = el.getAttribute('tabindex');
+      var focusable = ti !== null && parseInt(ti, 10) >= 0;
+      if (!(focusable && el.getAttribute('role'))) add('kb-click-nonint', el);
+    }
+    var anchors = doc.querySelectorAll('a');
+    for (i = 0; i < anchors.length; i++) {
+      el = anchors[i];
+      if (!el.hasAttribute('href') && el.hasAttribute('onclick')) add('kb-link-no-href', el);
+    }
+    var tabbed = doc.querySelectorAll('[tabindex]');
+    for (i = 0; i < tabbed.length; i++) {
+      if (parseInt(tabbed[i].getAttribute('tabindex'), 10) > 0) add('kb-positive-tabindex', tabbed[i]);
+    }
+
+    var cssRules = [];
+    function collect(rules) {
+      for (var r = 0; r < rules.length; r++) {
+        var rule = rules[r];
+        if (rule.cssRules && !rule.selectorText) collect(rule.cssRules);
+        else if (rule.selectorText && rule.style) cssRules.push(rule);
+      }
+    }
+    try {
+      for (i = 0; i < doc.styleSheets.length; i++) {
+        var sheetRules; try { sheetRules = doc.styleSheets[i].cssRules; } catch (e) { continue; }
+        if (sheetRules) collect(sheetRules);
+      }
+    } catch (e) { /* ignore */ }
+    // A visible :focus-visible style elsewhere means removing the default outline is fine.
+    var hasFocusVisibleStyle = cssRules.some(function (rule) {
+      var s = rule.style;
+      return /:focus-visible/.test(rule.selectorText) && ((s.outlineStyle && s.outlineStyle !== 'none' && s.outlineWidth !== '0px') || s.boxShadow);
+    });
+    cssRules.forEach(function (rule) {
+      var sel = rule.selectorText, s = rule.style;
+      var removed = s.outlineStyle === 'none' || s.outlineWidth === '0px' || /^\s*(none|0)(px)?\s*(!important)?\s*$/.test(s.outline || '');
+      if (!removed) return;
+      var isFocus = /:focus(?!-visible)/.test(sel) && !/:not\(\s*:focus/.test(sel);
+      var isUniversal = /^\s*\*\s*$/.test(sel);
+      var replacement = s.boxShadow || s.border || s.borderColor || s.backgroundColor || s.background || s.textDecoration;
+      if ((isFocus || isUniversal) && !replacement && !hasFocusVisibleStyle) {
+        add('kb-focus-removed', null, { key: 'kb-focus-removed' }, { selector: sel, snippet: sel + ' { outline: none; }' });
+      }
+    });
+
+    if (!isFragment) {
+      var allLinks = doc.querySelectorAll('a[href]');
+      if (allLinks.length >= 6 || doc.querySelector('nav')) {
+        var hasSkip = false;
+        for (i = 0; i < Math.min(5, allLinks.length); i++) {
+          var h = allLinks[i].getAttribute('href') || '';
+          if (h.length > 1 && h.charAt(0) === '#') hasSkip = true;
+        }
+        seen('keyboard');
+        if (!hasSkip) add('kb-no-skip-link', null, {}, { selector: '(whole page)', snippet: 'No in-page link found among the first focusable links' });
+      }
+    }
+
+    var links = doc.querySelectorAll('a[href]');
+    var generic = /^(click here|here|read more|more|learn more|link|this|click|details|this link|more info|continue)$/i;
+    for (i = 0; i < links.length; i++) {
+      el = links[i];
+      if (!rendered(el)) continue;
+      var nm = accName(el, doc);
+      if (!nm) add('link-no-name', el);
+      else if (generic.test(nm.replace(/[.!…»›>\s]+$/g, '').trim())) add('link-generic', el);
+    }
+    var buttons = doc.querySelectorAll('button, [role="button"], input[type="button"], input[type="reset"], input[type="image"]');
+    for (i = 0; i < buttons.length; i++) {
+      el = buttons[i];
+      if (!rendered(el)) continue;
+      var bn;
+      if (el.tagName === 'INPUT') bn = (el.getAttribute('type') === 'image') ? (el.getAttribute('alt') || el.getAttribute('aria-label') || '') : (el.getAttribute('value') || el.getAttribute('aria-label') || '');
+      else bn = accName(el, doc);
+      if (!String(bn).trim()) add('button-no-name', el);
+    }
+    var media = doc.querySelectorAll('video, audio');
+    for (i = 0; i < media.length; i++) {
+      el = media[i];
+      seen('keyboard');
+      if (el.hasAttribute('autoplay') && !(el.hasAttribute('muted') && el.hasAttribute('controls'))) add('media-autoplay', el);
+      if (el.tagName === 'VIDEO' && !el.querySelector('track[kind="captions"],track[kind="subtitles"]')) add('media-no-captions', el);
+    }
+    var hidden = doc.querySelectorAll('[aria-hidden="true"]');
+    var focusSel = 'a[href],button:not([disabled]),input:not([type="hidden"]):not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+    for (i = 0; i < hidden.length; i++) {
+      if (hidden[i].matches(focusSel) || hidden[i].querySelector(focusSel)) add('hidden-focusable', hidden[i]);
+    }
+
+    /* Page structure */
+    if (!isFragment) {
+      seen('structure', 3);
+      if (!(doc.documentElement.getAttribute('lang') || '').trim()) add('doc-lang', null, {}, { selector: 'html', snippet: openTag(doc.documentElement) });
+      if (!(doc.title || '').trim()) add('doc-title', null, {}, { selector: 'head', snippet: 'No <title> found, or it is empty' });
+      var vp = doc.querySelector('meta[name="viewport"]');
+      if (vp) {
+        var c = vp.getAttribute('content') || '';
+        var mx = c.match(/maximum-scale\s*=\s*([\d.]+)/i);
+        if (/user-scalable\s*=\s*(no|0)/i.test(c) || (mx && parseFloat(mx[1]) < 2)) add('doc-viewport', vp);
+      }
+      seen('structure');
+      if (!doc.querySelector('main,[role="main"]')) add('landmark-main', null, {}, { selector: '(whole page)', snippet: 'No <main> element found' });
+    }
+
+    var heads = doc.querySelectorAll('h1,h2,h3,h4,h5,h6');
+    var prev = 0, h1s = [];
+    for (i = 0; i < heads.length; i++) {
+      el = heads[i];
+      if (!rendered(el)) continue;
+      var lvl = parseInt(el.tagName.charAt(1), 10);
+      seen('structure');
+      if (lvl === 1) h1s.push(el);
+      if (!textOf(el) && !el.querySelector('img[alt]:not([alt=""])')) add('heading-empty', el);
+      if (prev && lvl > prev + 1) add('heading-skip', el);
+      prev = lvl;
+    }
+    if (!isFragment && h1s.length === 0) add('heading-no-h1', null, {}, { selector: '(whole page)', snippet: 'No <h1> found' });
+    if (h1s.length > 1) add('heading-multi-h1', h1s[1]);
+
+    var frames = doc.querySelectorAll('iframe');
+    for (i = 0; i < frames.length; i++) {
+      seen('structure');
+      if (!((frames[i].getAttribute('title') || '').trim() || frames[i].getAttribute('aria-label'))) add('iframe-title', frames[i]);
+    }
+    var tables = doc.querySelectorAll('table');
+    for (i = 0; i < tables.length; i++) {
+      el = tables[i];
+      var trole = el.getAttribute('role');
+      if (trole === 'presentation' || trole === 'none') continue;
+      seen('structure');
+      if (!el.querySelector('th') && el.querySelectorAll('tr').length >= 2 && el.querySelectorAll('td').length >= 2) add('table-headers', el);
+    }
+    var withId = doc.querySelectorAll('[id]'), idSeen = {};
+    for (i = 0; i < withId.length; i++) {
+      var id = withId[i].id;
+      if (!id) continue;
+      if (idSeen[id]) { if (idSeen[id] === 1) add('dup-id', withId[i], { key: 'dup-id' }); idSeen[id]++; } else idSeen[id] = 1;
+    }
+
+    /* Contrast and text size (needs real layout) */
+    if (layout && doc.body) {
+      var all = doc.body.querySelectorAll('*');
+      for (i = 0; i < all.length; i++) {
+        el = all[i];
+        var tag = el.tagName;
+        if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT' || tag === 'TEMPLATE' || tag === 'OPTION') continue;
+        if (el.closest('svg')) continue;
+        var hasText = false;
+        for (var k = 0; k < el.childNodes.length; k++) {
+          if (el.childNodes[k].nodeType === 3 && el.childNodes[k].nodeValue.trim()) { hasText = true; break; }
+        }
+        if (!hasText || !rendered(el)) continue;
+        var disabled = false;
+        try { disabled = el.matches(':disabled'); } catch (e) { /* ignore */ }
+        if (disabled) continue;
+
+        var cs = win.getComputedStyle(el);
+        var size = parseFloat(cs.fontSize) || 16;
+        if (size < 12) { seen('structure'); add('text-tiny', el); }
+
+        var bgInfo = effectiveBg(el);
+        seen('contrast');
+        if (bgInfo.hasImage) { add('contrast-image', el); continue; }
+
+        var fg = parseColor(cs.color);
+        fg.a = fg.a * (parseFloat(cs.opacity) || 1);
+        var fgFinal = fg.a < 1 ? blend(fg, bgInfo.color) : fg;
+        var cr = ratio(fgFinal, bgInfo.color);
+        var bold = (parseInt(cs.fontWeight, 10) || 400) >= 700 || cs.fontWeight === 'bold';
+        var large = size >= 24 || (size >= 18.66 && bold);
+        var need = large ? 3 : 4.5;
+        if (cr + 0.001 < need) {
+          var fgHex = toHex(fgFinal), bgHex = toHex(bgInfo.color);
+          var sug = suggest(fgFinal, bgInfo.color, need);
+          add(cr < 3 ? 'contrast-very-low' : 'contrast-low', el, {
+            key: 'contrast|' + fgHex + '|' + bgHex + '|' + (large ? 'L' : 'N'),
+            fg: fgHex, bg: bgHex, ratio: floor2(cr), need: need, large: large,
+            suggested: toHex(sug), suggestedRatio: floor2(ratio(sug, bgInfo.color)),
+            title: 'Low contrast: ' + fgHex + ' on ' + bgHex + ' (' + floor2(cr).toFixed(2) + ' : 1)'
+          });
+        }
+      }
+    }
+
+    /* Passed checks */
+    var passed = [];
+    if (st.images.total && !has('img-alt-missing') && !has('img-alt-bad') && !has('svg-no-name')) passed.push('All ' + st.images.total + ' image' + (st.images.total === 1 ? ' has' : 's have') + ' a text alternative.');
+    if (st.forms.total && !has('form-label-missing') && !has('form-label-placeholder')) passed.push('Every form field has a proper label.');
+    if (layout && st.contrast.total && !has('contrast-low') && !has('contrast-very-low')) passed.push('All text we could measure meets the contrast minimum.');
+    if (!isFragment) {
+      if (!has('doc-lang')) passed.push('The page language is set.');
+      if (!has('doc-title')) passed.push('The page has a title.');
+      if (doc.querySelector('meta[name="viewport"]') && !has('doc-viewport')) passed.push('Visitors can zoom the page.');
+      if (!has('landmark-main')) passed.push('The page has a main landmark.');
+    }
+    if (!has('kb-focus-removed') && layout) passed.push('Keyboard focus outlines have not been removed in CSS.');
+
+    /* Score */
+    var issues = order.map(function (it) {
+      var meta = RULES[it.rule];
+      return {
+        key: it.key, rule: it.rule, sev: meta.sev, cat: meta.cat, count: it.count, examples: it.examples,
+        title: it.extra.title || meta.title, plain: meta.plain, why: meta.why, fix: meta.fix, wcag: meta.wcag,
+        code: meta.code, srBefore: meta.srBefore, srAfter: meta.srAfter,
+        contrast: it.extra.fg ? { fg: it.extra.fg, bg: it.extra.bg, ratio: it.extra.ratio, need: it.extra.need,
+          suggested: it.extra.suggested, suggestedRatio: it.extra.suggestedRatio, large: it.extra.large } : null
+      };
+    });
+    issues.forEach(function (it) {
+      if (it.contrast) it.code = '/* ' + (it.contrast.large ? 'Large text needs 3 : 1' : 'Normal text needs 4.5 : 1') + ' */\ncolor: ' + it.contrast.suggested + '; /* ' + it.contrast.suggestedRatio.toFixed(2) + ' : 1 on ' + it.contrast.bg + ' */';
+    });
+    issues.sort(function (a, b) {
+      var d = SEV_ORDER.indexOf(a.sev) - SEV_ORDER.indexOf(b.sev);
+      return d || b.count - a.count;
+    });
+    var penalty = 0, sevCounts = { critical: 0, serious: 0, moderate: 0, minor: 0 }, places = 0;
+    issues.forEach(function (it) {
+      penalty += SEV_WEIGHT[it.sev] * (1 + Math.min(it.count - 1, 4) * 0.25);
+      sevCounts[it.sev]++;
+      places += it.count;
+    });
+    var score = Math.round(100 * Math.exp(-penalty / 80));
+    var grade = score >= 90 ? 'Strong foundation' : score >= 75 ? 'Good start' : score >= 50 ? 'Needs work' : 'Significant barriers';
+
+    return {
+      score: score, grade: grade, issues: issues, sevCounts: sevCounts, places: places,
+      stats: st, passed: passed, isFragment: isFragment, contrastChecked: layout,
+      generatedAt: new Date().toISOString()
+    };
+  }
+
+  function analyze(html, cb) {
+    var isFragment = !/<html[\s>]/i.test(html);
+    var source = isFragment
+      ? '<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>Fragment</title></head><body>' + html + '</body></html>'
+      : html;
+    var cv = document.createElement('canvas'); cv.width = cv.height = 1;
+    var ctx = cv.getContext('2d', { willReadFrequently: true });
+
+    var frame = document.createElement('iframe');
+    frame.setAttribute('sandbox', 'allow-same-origin');
+    frame.setAttribute('aria-hidden', 'true');
+    frame.tabIndex = -1;
+    frame.style.cssText = 'position:fixed;left:-10000px;top:0;width:1024px;height:768px;border:0;pointer-events:none;';
+    var finished = false;
+
+    function finish() {
+      if (finished) return; finished = true;
+      var result, doc = null, win = null;
+      try { doc = frame.contentDocument; win = frame.contentWindow; } catch (e) { /* blocked */ }
+      try {
+        if (doc && doc.documentElement && win) {
+          result = run(doc, win, ctx, true, isFragment);
+        } else {
+          var parsed = new DOMParser().parseFromString(source, 'text/html');
+          result = run(parsed, null, ctx, false, isFragment);
+        }
+      } catch (err) {
+        if (frame.parentNode) frame.parentNode.removeChild(frame);
+        cb(null, err); return;
+      }
+      if (frame.parentNode) frame.parentNode.removeChild(frame);
+      cb(result);
+    }
+    frame.addEventListener('load', finish);
+    frame.srcdoc = source;
+    document.body.appendChild(frame);
+    setTimeout(finish, 6000);
+  }
+
+  global.FairWeb = {
+    analyze: analyze, RULES: RULES, CATS: CATS, SEV_ORDER: SEV_ORDER, SEV_LABEL: SEV_LABEL,
+    ratio: ratio, lum: lum, parseHex: parseHex, toHex: toHex, suggest: suggest, floor2: floor2
+  };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+  <script>
+/* FairWeb AI – report builders (standalone HTML, Markdown, short summary). */
+(function (global) {
+  'use strict';
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function when(r) {
+    try { return new Date(r.generatedAt).toLocaleString(); } catch (e) { return r.generatedAt; }
+  }
+  function placesText(n) { return n + (n === 1 ? ' place' : ' places'); }
+
+  function summary(r) {
+    var c = r.sevCounts;
+    return 'FairWeb AI accessibility report: score ' + r.score + '/100 (' + r.grade + '). ' +
+      r.issues.length + ' problem types in ' + placesText(r.places) + ': ' +
+      c.critical + ' critical, ' + c.serious + ' serious, ' + c.moderate + ' moderate, ' + c.minor + ' minor.';
+  }
+
+  function toMarkdown(r) {
+    var L = FairWeb.SEV_LABEL, CATS = FairWeb.CATS;
+    var out = [];
+    out.push('# FairWeb AI accessibility report', '');
+    out.push('Generated: ' + when(r), '');
+    out.push('**Score: ' + r.score + '/100 (' + r.grade + ')**', '');
+    out.push(summary(r).replace(/^FairWeb AI accessibility report: /, ''), '');
+    if (r.isFragment) out.push('_Checked as a snippet, so page-level checks were skipped._', '');
+    if (!r.contrastChecked) out.push('_Contrast could not be measured in this browser mode._', '');
+
+    if (!r.issues.length) out.push('No problems found by the automated checks. Test with a keyboard and a screen reader to be sure.', '');
+    r.issues.forEach(function (it, idx) {
+      out.push('## ' + (idx + 1) + '. ' + it.title, '');
+      out.push('- **Severity:** ' + L[it.sev]);
+      out.push('- **Area:** ' + CATS[it.cat]);
+      out.push('- **Found:** ' + placesText(it.count));
+      out.push('- **WCAG:** ' + it.wcag, '');
+      out.push('**What’s wrong.** ' + it.plain, '');
+      out.push('**Who it affects.** ' + it.why, '');
+      out.push('**How to fix it.** ' + it.fix, '');
+      if (it.code) out.push('```html', it.code, '```', '');
+      if (it.srBefore && it.srAfter && it.srBefore.indexOf('Not applicable') !== 0) {
+        out.push('**Screen reader today:** ' + it.srBefore, '', '**After the fix:** ' + it.srAfter, '');
+      }
+      if (it.examples.length) {
+        out.push('**Where:**', '');
+        it.examples.forEach(function (ex) { out.push('- `' + ex.selector + '`', '  ```html', '  ' + ex.snippet, '  ```'); });
+        if (it.count > it.examples.length) out.push('- …and ' + (it.count - it.examples.length) + ' more');
+        out.push('');
+      }
+    });
+    if (r.passed.length) {
+      out.push('## What’s already working', '');
+      r.passed.forEach(function (p) { out.push('- ' + p); });
+      out.push('');
+    }
+    out.push('---', 'Automated checks find some barriers, not all. Test with a keyboard and a screen reader as well.', '');
+    return out.join('\n');
+  }
+
+  function toHTML(r) {
+    var L = FairWeb.SEV_LABEL, CATS = FairWeb.CATS;
+    var css = 'body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.6;color:#0b1f33;background:#fff;margin:0}' +
+      'main{max-width:50rem;margin:0 auto;padding:2rem 1rem 4rem}h1{font-size:2rem;margin:0 0 .5rem}h2{font-size:1.25rem;margin:0 0 .5rem}' +
+      '.score{font-size:1.25rem;font-weight:700}article{border:2px solid #0b1f33;border-left-width:10px;padding:1rem 1.25rem;margin:1rem 0}' +
+      '.critical{border-left-color:#b42318}.serious{border-left-color:#c2570c}.moderate{border-left-color:#a16207}.minor{border-left-color:#2563eb}' +
+      '.meta{color:#3a4a5c;font-size:.9rem;font-weight:700}pre{background:#0b1f33;color:#f4f7fb;padding:.9rem;overflow:auto;border-radius:4px;font-size:.85rem}' +
+      'code{font-family:ui-monospace,Menlo,Consolas,monospace}li{margin:.25rem 0}a{color:#2b2fd9}:focus-visible{outline:3px solid #0b1f33;outline-offset:2px}';
+    var h = [];
+    h.push('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">');
+    h.push('<title>FairWeb AI accessibility report</title><style>' + css + '</style></head><body><main>');
+    h.push('<h1>FairWeb AI accessibility report</h1>');
+    h.push('<p class="meta">Generated ' + esc(when(r)) + '</p>');
+    h.push('<p class="score">Score: ' + r.score + '/100 (' + esc(r.grade) + ')</p>');
+    h.push('<p>' + esc(summary(r).replace(/^FairWeb AI accessibility report: /, '')) + '</p>');
+    if (r.isFragment) h.push('<p><em>Checked as a snippet, so page-level checks were skipped.</em></p>');
+    if (!r.contrastChecked) h.push('<p><em>Contrast could not be measured in this browser mode.</em></p>');
+    if (!r.issues.length) h.push('<p>No problems found by the automated checks. Test with a keyboard and a screen reader to be sure.</p>');
+    r.issues.forEach(function (it, idx) {
+      h.push('<article class="' + it.sev + '"><h2>' + (idx + 1) + '. ' + esc(it.title) + '</h2>');
+      h.push('<p class="meta">' + L[it.sev] + ' · ' + esc(CATS[it.cat]) + ' · ' + placesText(it.count) + ' · WCAG ' + esc(it.wcag) + '</p>');
+      h.push('<p><strong>What’s wrong.</strong> ' + esc(it.plain) + '</p>');
+      h.push('<p><strong>Who it affects.</strong> ' + esc(it.why) + '</p>');
+      h.push('<p><strong>How to fix it.</strong> ' + esc(it.fix) + '</p>');
+      if (it.code) h.push('<pre><code>' + esc(it.code) + '</code></pre>');
+      if (it.srBefore && it.srAfter && it.srBefore.indexOf('Not applicable') !== 0) {
+        h.push('<p><strong>Screen reader today:</strong> ' + esc(it.srBefore) + '<br><strong>After the fix:</strong> ' + esc(it.srAfter) + '</p>');
+      }
+      if (it.examples.length) {
+        h.push('<p><strong>Where:</strong></p><ul>');
+        it.examples.forEach(function (ex) { h.push('<li><code>' + esc(ex.selector) + '</code><pre><code>' + esc(ex.snippet) + '</code></pre></li>'); });
+        if (it.count > it.examples.length) h.push('<li>…and ' + (it.count - it.examples.length) + ' more</li>');
+        h.push('</ul>');
+      }
+      h.push('</article>');
+    });
+    if (r.passed.length) {
+      h.push('<h2>What’s already working</h2><ul>');
+      r.passed.forEach(function (p) { h.push('<li>' + esc(p) + '</li>'); });
+      h.push('</ul>');
+    }
+    h.push('<hr><p>Automated checks find some barriers, not all. Test with a keyboard and a screen reader as well.</p></main></body></html>');
+    return h.join('\n');
+  }
+
+  function download(name, text, mime) {
+    var blob = new Blob([text], { type: mime + ';charset=utf-8' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+  }
+
+  global.FairReport = { toMarkdown: toMarkdown, toHTML: toHTML, summary: summary, download: download };
+})(window);
+
+</script>
+  <script>
+/* FairWeb AI – UI wiring */
+(function () {
+  'use strict';
+
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var root = document.documentElement;
+  var lastResult = null;
+  var activeCat = 'all';
+
+  /* ---------- tiny DOM builder (uses textContent, so pasted code can never inject markup) ---------- */
+  function h(tag, props, kids) {
+    var n = document.createElement(tag);
+    Object.keys(props || {}).forEach(function (k) {
+      var v = props[k];
+      if (v === false || v == null) return;
+      if (k === 'class') n.className = v;
+      else if (k === 'text') n.textContent = v;
+      else if (k.slice(0, 2) === 'on') n.addEventListener(k.slice(2), v);
+      else n.setAttribute(k, v === true ? '' : v);
+    });
+    (kids || []).forEach(function (c) {
+      if (c == null || c === false) return;
+      n.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+    });
+    return n;
+  }
+
+  function announce(msg) { $('#status').textContent = ''; setTimeout(function () { $('#status').textContent = msg; }, 50); }
+  function reduceMotion() { return root.getAttribute('data-motion') === 'reduce' || window.matchMedia('(prefers-reduced-motion: reduce)').matches; }
+
+  function copyText(text, okMsg) {
+    function fallback() {
+      var ta = h('textarea', { 'aria-hidden': 'true', tabindex: '-1', style: 'position:fixed;left:-9999px' });
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); announce(okMsg); } catch (e) { announce('Copy failed. Select the text and copy it by hand.'); }
+      ta.remove();
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { announce(okMsg); }, fallback);
+    } else fallback();
+  }
+
+  /* ---------- Display preferences ---------- */
+  function store(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } }
+  function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+  function setPref(btn, attr, onValue, offValue, key, on) {
+    root.setAttribute(attr, on ? onValue : offValue);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    store(key, on ? '1' : '0');
+  }
+  [
+    ['#pref-contrast', 'data-theme', 'hc', 'default', 'fw-hc'],
+    ['#pref-size', 'data-size', 'large', 'normal', 'fw-large'],
+    ['#pref-motion', 'data-motion', 'reduce', 'auto', 'fw-motion']
+  ].forEach(function (p) {
+    var btn = $(p[0]);
+    if (load(p[4]) === '1') setPref(btn, p[1], p[2], p[3], p[4], true);
+    btn.addEventListener('click', function () {
+      setPref(btn, p[1], p[2], p[3], p[4], btn.getAttribute('aria-pressed') !== 'true');
+    });
+  });
+  // Close the options panel with Escape
+  $('.prefs').addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { this.removeAttribute('open'); $('.prefs summary').focus(); }
+  });
+
+  /* ---------- Analyzer ---------- */
+  var input = $('#html-input'), errorEl = $('#input-error'), runBtn = $('#run-check');
+
+  function showError(msg) { errorEl.textContent = msg; errorEl.hidden = false; }
+  function clearError() { errorEl.hidden = true; errorEl.textContent = ''; }
+
+  function loadSample(andRun) {
+    input.value = window.FAIRWEB_SAMPLE;
+    clearError();
+    if (andRun) check();
+  }
+
+  function check() {
+    clearError();
+    var html = input.value;
+    if (!html.trim()) { showError('Paste some HTML first, or load the sample page.'); input.focus(); return; }
+    runBtn.disabled = true; runBtn.textContent = 'Checking…';
+    announce('Checking your page.');
+    FairWeb.analyze(html, function (result, err) {
+      runBtn.disabled = false; runBtn.textContent = 'Check accessibility';
+      if (!result) { showError('Something went wrong while reading that HTML. Check that it is complete and try again.'); console.error(err); return; }
+      lastResult = result; activeCat = 'all';
+      render(result);
+    });
+  }
+
+  runBtn.addEventListener('click', check);
+  $('#load-sample').addEventListener('click', function () { loadSample(false); announce('Sample page loaded. Press Check accessibility.'); input.focus(); });
+  $('#hero-sample').addEventListener('click', function () {
+    loadSample(true);
+    $('#analyzer').scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth' });
+  });
+  $('#clear-input').addEventListener('click', function () { input.value = ''; clearError(); input.focus(); });
+  $('#file-input').addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function () { input.value = String(reader.result); clearError(); announce('Loaded ' + f.name + '. Press Check accessibility.'); input.focus(); };
+    reader.onerror = function () { showError('That file could not be read.'); };
+    reader.readAsText(f);
+    e.target.value = '';
+  });
+  // The file label is a visible button; make Enter/Space on it open the picker.
+  $('.file-btn').setAttribute('role', 'button');
+  $('.file-btn').setAttribute('tabindex', '0');
+  $('.file-btn').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); $('#file-input').click(); }
+  });
+
+  /* ---------- Rendering results ---------- */
+  var SEV_LABEL = FairWeb.SEV_LABEL, CATS = FairWeb.CATS;
+
+  function render(r) {
+    var results = $('#results');
+    results.hidden = false;
+
+    // Score ring
+    var C = 2 * Math.PI * 52;
+    var bar = $('#score-bar');
+    bar.style.strokeDasharray = C;
+    bar.style.strokeDashoffset = C;
+    requestAnimationFrame(function () { requestAnimationFrame(function () { bar.style.strokeDashoffset = C * (1 - r.score / 100); }); });
+    $('#score-num').textContent = r.score;
+    $('#grade').textContent = r.grade + ': ' + r.score + ' out of 100';
+    $('#summary-line').textContent = r.issues.length
+      ? r.issues.length + ' kinds of problem to fix, in ' + r.places + (r.places === 1 ? ' place.' : ' places.') + ' Start at the top: the list is sorted by how badly each one blocks people.'
+      : 'No problems found by the automated checks. Test with a keyboard and a screen reader to be sure.';
+
+    var sev = $('#sev-counts'); sev.textContent = '';
+    FairWeb.SEV_ORDER.forEach(function (s) {
+      sev.appendChild(h('li', {}, [h('span', { class: 'badge badge-' + s, text: SEV_LABEL[s] + ': ' + r.sevCounts[s] })]));
+    });
+
+    // Categories
+    var cats = $('#cats'); cats.textContent = '';
+    Object.keys(CATS).forEach(function (k) {
+      var s = r.stats[k];
+      if (k === 'contrast' && !r.contrastChecked) return;
+      if (!s.total) return;
+      var bad = Math.min(s.bad, s.total), ok = s.total - bad;
+      cats.appendChild(h('li', { class: bad ? 'cat-bad' : '' }, [
+        h('div', { class: 'cat-top' }, [h('span', { text: CATS[k] }), h('span', { text: ok + ' of ' + s.total + ' OK' })]),
+        h('div', { class: 'cat-bar', 'aria-hidden': 'true' }, [h('span', { class: 'cat-fill', style: 'width:' + Math.round(ok / s.total * 100) + '%' })])
+      ]));
+    });
+
+    // Notes
+    var notes = $('#notes'); notes.textContent = '';
+    if (r.isFragment) notes.appendChild(h('p', { text: 'Checked as a snippet, so page-level checks (language, title, zoom, main landmark) were skipped.' }));
+    if (!r.contrastChecked) notes.appendChild(h('p', { text: 'Your browser blocked the layout engine we use, so contrast and text-size checks were skipped. Try opening this page through a local server or a different browser.' }));
+    notes.appendChild(h('p', { text: 'Automated checks find some barriers, not all. Use this as a fast first pass, then try the keyboard test and a screen reader.' }));
+
+    // Filters + issues
+    buildFilters(r);
+    renderIssues(r);
+
+    // Passed
+    var passed = $('#passed'); passed.textContent = '';
+    $('#passed-wrap').hidden = !r.passed.length;
+    r.passed.forEach(function (p) { passed.appendChild(h('li', { text: p })); });
+
+    // Move focus to the report
+    results.scrollIntoView({ behavior: reduceMotion() ? 'auto' : 'smooth' });
+    results.focus({ preventScroll: true });
+    announce('Report ready. Score ' + r.score + ' out of 100. ' + r.issues.length + ' kinds of problem found.');
+  }
+
+  function buildFilters(r) {
+    var box = $('#filters'); box.textContent = '';
+    var present = {};
+    r.issues.forEach(function (i) { present[i.cat] = (present[i.cat] || 0) + 1; });
+    function btn(key, label) {
+      var b = h('button', { type: 'button', class: 'btn', 'aria-pressed': key === activeCat ? 'true' : 'false', text: label });
+      b.addEventListener('click', function () {
+        activeCat = key;
+        Array.prototype.forEach.call(box.children, function (c) { c.setAttribute('aria-pressed', 'false'); });
+        b.setAttribute('aria-pressed', 'true');
+        renderIssues(lastResult);
+      });
+      return b;
+    }
+    if (r.issues.length) {
+      box.appendChild(btn('all', 'All (' + r.issues.length + ')'));
+      Object.keys(CATS).forEach(function (k) { if (present[k]) box.appendChild(btn(k, CATS[k] + ' (' + present[k] + ')')); });
+    }
+  }
+
+  function codeBlock(label, code) {
+    var copy = h('button', { type: 'button', class: 'btn copy-btn', text: 'Copy code', 'aria-label': 'Copy code for: ' + label });
+    copy.addEventListener('click', function () { copyText(code, 'Code copied.'); });
+    return h('div', { class: 'codewrap' }, [
+      h('div', { class: 'codebar' }, [h('span', { class: 'wcag', text: 'Suggested fix' }), copy]),
+      h('pre', {}, [h('code', { text: code })])
+    ]);
+  }
+
+  function renderIssues(r) {
+    var list = $('#issues'); list.textContent = '';
+    var shown = r.issues.filter(function (i) { return activeCat === 'all' || i.cat === activeCat; });
+    if (!shown.length) {
+      list.appendChild(h('li', { class: 'empty-state', text: r.issues.length ? 'No problems in this area.' : 'Nice work. The automated checks found nothing to fix.' }));
+      return;
+    }
+    shown.forEach(function (it, idx) {
+      var body = [];
+      body.push(h('div', {}, [h('h4', { text: 'What’s wrong' }), h('p', { text: it.plain })]));
+      body.push(h('div', {}, [h('h4', { text: 'Who it affects' }), h('p', { text: it.why })]));
+      body.push(h('div', {}, [h('h4', { text: 'How to fix it' }), h('p', { text: it.fix })]));
+
+      if (it.contrast) {
+        var c = it.contrast;
+        body.push(h('div', { class: 'swatches' }, [
+          h('div', { class: 'swatch', style: 'color:' + c.fg + ';background:' + c.bg }, [h('small', { text: 'Now: ' + c.ratio.toFixed(2) + ' : 1' }), 'The quick brown fox jumps over the lazy dog']),
+          h('div', { class: 'swatch', style: 'color:' + c.suggested + ';background:' + c.bg }, [h('small', { text: 'Suggested: ' + c.suggested + ', ' + c.suggestedRatio.toFixed(2) + ' : 1' }), 'The quick brown fox jumps over the lazy dog'])
+        ]));
+      }
+      if (it.code) body.push(codeBlock(it.title, it.code));
+
+      if (it.srBefore && it.srAfter && it.srBefore.indexOf('Not applicable') !== 0) {
+        body.push(h('div', { class: 'sr-compare' }, [
+          h('blockquote', {}, [h('strong', { text: 'A screen reader user hears now' }), it.srBefore]),
+          h('blockquote', { class: 'good' }, [h('strong', { text: 'After the fix' }), it.srAfter])
+        ]));
+      }
+
+      if (it.examples.length) {
+        var exs = it.examples.map(function (ex) {
+          return h('li', {}, [h('div', { class: 'example-selector', text: ex.selector }), h('pre', {}, [h('code', { text: ex.snippet })])]);
+        });
+        if (it.count > it.examples.length) exs.push(h('li', { text: '…and ' + (it.count - it.examples.length) + ' more.' }));
+        body.push(h('div', {}, [h('h4', { text: 'Where it happens' }), h('ul', { class: 'examples' }, exs)]));
+      }
+      body.push(h('p', { class: 'wcag', text: 'WCAG reference: ' + it.wcag }));
+
+      var details = h('details', { class: 'issue sev-' + it.sev }, [
+        h('summary', {}, [
+          h('span', { class: 'badge badge-' + it.sev, text: SEV_LABEL[it.sev] }),
+          h('h3', { class: 'issue-title', text: it.title }),
+          h('span', { class: 'issue-meta', text: CATS[it.cat] + ' · ' + it.count + (it.count === 1 ? ' place' : ' places') })
+        ]),
+        h('div', { class: 'issue-body' }, body)
+      ]);
+      if (idx < 2) details.open = true;
+      list.appendChild(h('li', {}, [details]));
+    });
+    announce('Showing ' + shown.length + ' problem' + (shown.length === 1 ? '' : 's') + '.');
+  }
+
+  $('#expand-all').addEventListener('click', function () {
+    Array.prototype.forEach.call(document.querySelectorAll('details.issue'), function (d) { d.open = true; });
+  });
+  $('#collapse-all').addEventListener('click', function () {
+    Array.prototype.forEach.call(document.querySelectorAll('details.issue'), function (d) { d.open = false; });
+  });
+
+  /* ---------- Report actions ---------- */
+  function need() { if (!lastResult) { announce('Run a check first.'); return false; } return true; }
+  $('#dl-html').addEventListener('click', function () { if (need()) { FairReport.download('fairweb-report.html', FairReport.toHTML(lastResult), 'text/html'); announce('HTML report downloaded.'); } });
+  $('#dl-md').addEventListener('click', function () { if (need()) { FairReport.download('fairweb-report.md', FairReport.toMarkdown(lastResult), 'text/markdown'); announce('Markdown report downloaded.'); } });
+  $('#copy-summary').addEventListener('click', function () { if (need()) copyText(FairReport.summary(lastResult), 'Summary copied.'); });
+  $('#print-report').addEventListener('click', function () { if (need()) window.print(); });
+  window.addEventListener('beforeprint', function () {
+    Array.prototype.forEach.call(document.querySelectorAll('details.issue'), function (d) { d.open = true; });
+  });
+
+  /* ---------- Contrast lab ---------- */
+  var fgHex = $('#fg-hex'), bgHex = $('#bg-hex'), fgPick = $('#fg-picker'), bgPick = $('#bg-picker');
+  var labErr = $('#lab-error'), applyBtn = $('#apply-suggest');
+  var suggestedHex = null;
+
+  function normHex(v) { var c = FairWeb.parseHex(v); return c ? FairWeb.toHex(c) : null; }
+
+  function labUpdate() {
+    var fg = FairWeb.parseHex(fgHex.value), bg = FairWeb.parseHex(bgHex.value);
+    if (!fg || !bg) {
+      labErr.textContent = 'Enter a 6-digit hex color such as #1b1b2f.'; labErr.hidden = false;
+      return;
+    }
+    labErr.hidden = true;
+    fgPick.value = FairWeb.toHex(fg); bgPick.value = FairWeb.toHex(bg);
+    var r = FairWeb.ratio(fg, bg), shown = FairWeb.floor2(r);
+    $('#ratio').textContent = shown.toFixed(2) + ' : 1';
+
+    var levels = [
+      ['Normal text, AA', 4.5], ['Large text, AA', 3], ['Normal text, AAA', 7], ['Large text, AAA', 4.5], ['Icons and input borders, AA', 3]
+    ];
+    var ul = $('#levels'); ul.textContent = '';
+    levels.forEach(function (l) {
+      var pass = r + 0.001 >= l[1];
+      ul.appendChild(h('li', { class: pass ? 'pass' : 'fail' }, [h('span', { text: l[0] + ' (' + l[1] + ' : 1)' }), h('b', { text: pass ? '✓ Pass' : '✗ Fail' })]));
+    });
+
+    var prev = $('#lab-preview');
+    prev.style.color = FairWeb.toHex(fg); prev.style.background = FairWeb.toHex(bg);
+
+    var msg = $('#lab-suggest');
+    if (r + 0.001 < 4.5) {
+      var s = FairWeb.suggest(fg, bg, 4.5);
+      suggestedHex = FairWeb.toHex(s);
+      msg.textContent = 'Closest text color that passes AA for body text: ' + suggestedHex + ' (' + FairWeb.floor2(FairWeb.ratio(s, bg)).toFixed(2) + ' : 1).';
+      applyBtn.hidden = false;
+    } else {
+      suggestedHex = null; applyBtn.hidden = true;
+      msg.textContent = 'These colors pass AA for body text.';
+    }
+  }
+
+  function wirePair(pick, hex) {
+    pick.addEventListener('input', function () { hex.value = pick.value; labUpdate(); });
+    hex.addEventListener('input', function () {
+      var v = hex.value.trim();
+      if (v && v.charAt(0) !== '#') v = '#' + v;
+      if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v)) { var n = normHex(v); hex.value = n; labUpdate(); }
+    });
+    hex.addEventListener('blur', function () { labUpdate(); });
+  }
+  wirePair(fgPick, fgHex); wirePair(bgPick, bgHex);
+  $('#swap-colors').addEventListener('click', function () { var t = fgHex.value; fgHex.value = bgHex.value; bgHex.value = t; labUpdate(); });
+  applyBtn.addEventListener('click', function () { if (suggestedHex) { fgHex.value = suggestedHex; labUpdate(); fgHex.focus(); } });
+  labUpdate();
+})();
+
+</script>
+</body>
+</html>
